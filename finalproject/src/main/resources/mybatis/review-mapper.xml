@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="review">
+
+	<!-- 등록 -->
+	<insert id="insert">
+		insert into review(
+			review_no, review_movie, review_writer, review_rating,
+			review_spoiler, review_content, review_like,
+            review_realiability
+		)
+		values(
+			review_sql.nextval, #{reviewMovie}, #{reviewWriter},
+			#{reviewRating}, #{reviewSpoiler}, #{reviewContent},
+			0, 0
+		)
+	</insert>
+	
+	<!-- 조회 -->
+	<select id="selectList" resultType="ReviewDto">
+		select * from review order by review_no desc
+	</select>
+	<!-- 컨텐츠 제목으로 조회 -->
+	<select id="selectOne" resultType="ReviewDto">	
+		select A.* from review A join contents B  on A.review_contents
+		= B.contents_id where instr(B.contents_title, #{contentsTitle}) > 0  
+		order by A.review_wtime desc;
+	</select>
+	
+	<!-- 수정 -->
+	<update id="updateUnit"> 
+		update review 
+		<set>
+			<if test="reviewRating != null">
+				review_rating = #{reviewRating},
+			</if>
+			<if test="reviewSpoiler != null">
+				review_spoiler = #{reviewSpoiler},
+			</if>
+			<if test="reviewText != null">
+				review_text = #{reviewText}
+			</if>
+		</set>
+		where review_no = #{reviewNo}
+	</update>
+	
+	<!-- 삭제 -->
+	<delete id="delete">
+		delete review where review_no = #{reviewNo}
+	</delete>
+	
+</mapper>
