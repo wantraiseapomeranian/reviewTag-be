@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,6 +21,7 @@ import com.kh.finalproject.dto.MemberDto;
 import com.kh.finalproject.error.TargetNotfoundException;
 import com.kh.finalproject.service.TokenService;
 import com.kh.finalproject.vo.MemberLoginResponseVO;
+import com.kh.finalproject.vo.TokenVO;
 
 @CrossOrigin
 @RestController
@@ -104,11 +106,11 @@ public class MemberRestController {
 	}
 	
 	//로그아웃
-//	@DeleteMapping("/logout")
-//	public void logout(@RequestHeader("Authorization") String bearerToken) {
-//		TokenVO tokenVO = tokenService.parse(bearerToken);
-//		memberTokenDao.deleteByTarget(tokenVO.getLoginId());
-//	}
+	@DeleteMapping("/logout")
+	public void logout(@RequestHeader("Authorization") String bearerToken) {
+		TokenVO tokenVO = tokenService.parse(bearerToken);
+		memberTokenDao.deleteByTarget(tokenVO.getLoginId());
+	}
 	
 	//회원탈퇴
 	@DeleteMapping("/{memberId}")

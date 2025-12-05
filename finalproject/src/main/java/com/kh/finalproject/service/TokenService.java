@@ -13,8 +13,10 @@ import com.kh.finalproject.configuration.JwtProperties;
 import com.kh.finalproject.dao.MemberTokenDao;
 import com.kh.finalproject.dto.MemberDto;
 import com.kh.finalproject.dto.MemberTokenDto;
+import com.kh.finalproject.error.UnauthorizationException;
 import com.kh.finalproject.vo.TokenVO;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -96,14 +98,51 @@ public class TokenService {
 				.build());
 	}
 	
-	/// parse ////////////////////////////////////////////
+	/// 넘어온 정보를 파싱(해석해서 변환) ////////////////////////////////////////////
+	public TokenVO parse(String authorization) {
+		//Bearer 토큰 검증
+		if(authorization.startsWith("Bearer ") == false) 
+			throw new UnauthorizationException();
+		//앞글자 제거(Bearer)
+		String token = authorization.substring(7);
 	
+		SecretKey key = Keys.hmacShaKeyFor(jwtProperties.getKeyStr().getBytes(StandardCharsets.UTF_8));
+		Claims claims = (Claims) 	Jwts.parser()
+								.verifyWith(key)
+								.requireIssuer(jwtProperties.getIssuer())
+							.build()
+								.parse(token)
+								.getPayload();
+		//Claims에 담긴 데이터를 TokenVO로 변환 -> 반환
+		return TokenVO.builder()
+								.loginId((String) claims.get("loginId"))
+								.loginLevel((String) claims.get("loginLevel"))
+							.build();
+	}
 	
 	
 	/// 토큰 만료까지 남은 시간 구하기 ////////////////////////////////////////////
+	public long getRemain(String authorization) {
+		//Bearer 토큰 검증
+		if(authorization.startsWith("Bearer ") == false) 
+			throw new UnauthorizationException();
+		//앞글자 제거(Bearer)
+		String token = authorization.substring(7);
 	
+		SecretKey key = Keys.hmacShaKeyFor(jwtProperties.getKeyStr().getBytes(StandardCharsets.UTF_8));
+		Claims claims = (Claims) 	Jwts.parser()
+								.verifyWith(key)
+								.requireIssuer(jwtProperties.getIssuer())
+							.build()
+								.parse(token)
+								.getPayload();
+		// 시간추출 (getTime() = Date객체 -> 숫자(ms) 변환)
+		Date expire = claims.getExpiration();
+		Date now = new Date();
+		return expire.getTime() - now.getTime(); // 만료시각 - 현재시각
+	}
 	
-	// checkRefresh Token
+	////// checkRefresh Token
 	
 	
 }
