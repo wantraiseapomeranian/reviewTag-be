@@ -60,6 +60,7 @@ public class QuizService {
     
     //상태 변경 메소드(관리자용)
     public boolean changeQuizStatus(QuizDto quizDto) {
+
         return quizDao.updateQuizStatus(quizDto);
     }
     
