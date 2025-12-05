@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="pointhistory">
+
+  <select id="sequence" resultType="int">
+      SELECT point_history_seq.nextval FROM dual
+  </select>
+
+  <insert id="insert">
+      INSERT INTO point_history(
+          point_history_no, 
+          point_history_member_id, 
+          point_history_amount, 
+          point_history_reason, 
+          point_history_item_no
+      )
+      VALUES(
+          #{pointHistoryNo}, 
+          #{pointHistoryMemberId}, 
+          #{pointHistoryAmount}, 
+          #{pointHistoryReason},  #{pointHistoryItemNo, jdbcType=NUMERIC} 
+       )
+  </insert>
+  
+  <update id="update">
+      UPDATE point_history
+      SET
+          point_history_reason = #{pointHistoryReason}, 
+          point_history_amount = #{pointHistoryAmount},
+          point_history_item_no = #{pointHistoryItemNo, jdbcType=NUMERIC}
+      WHERE
+          point_history_no = #{pointHistoryNo}
+  </update>
+  
+  <select id="selectList" resultType="PointHistoryDto">
+      SELECT * FROM point_history
+      WHERE point_history_member_id = #{memberId}
+      ORDER BY point_history_no DESC
+  </select>
+  
+  <select id="selectOneNumber" resultType="PointHistoryDto">
+      SELECT * FROM point_history
+      WHERE point_history_no = #{pointHistoryNo}
+  </select>
+ 
+  <delete id="delete">
+      DELETE FROM point_history
+      WHERE point_history_no = #{pointHistoryNo}
+  </delete>
+  
+</mapper>

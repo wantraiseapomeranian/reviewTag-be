@@ -23,8 +23,12 @@ public class ReviewDao {
 		return sqlSession.selectList("review.selectList");
 	}
 	
-	public ReviewDto selectOne(String contentsTitle) { //영화 제목으로 조회
-		return sqlSession.selectOne("review.selectOne", contentsTitle);
+	public ReviewDto selectOne(Long reviewNo) {
+		return sqlSession.selectOne("review.selectOne", reviewNo);
+	}
+	
+	public List<ReviewDto> detail(String contentsTitle) { //컨텐츠 제목으로 조회
+		return sqlSession.selectList("review.detail", contentsTitle);
 	}
 	
 	//부분수정
@@ -33,7 +37,7 @@ public class ReviewDao {
 	}
 	
 	//삭제
-	public boolean delete(int reviewNo) {
+	public boolean delete(Long reviewNo) {
 		return sqlSession.delete("review.delete", reviewNo) > 0;
 	}
 }

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="pointinventory">
+  
+  <select id="sequence" resultType="int">
+      SELECT point_inventory_seq.nextval FROM dual
+  </select>
+
+  <insert id="insert">
+      INSERT INTO point_inventory(
+          point_inventory_no,       
+          point_inventory_member_id, 
+          point_inventory_item_no,
+          point_inventory_item_amount, 
+          point_inventory_item_type
+      )
+      VALUES(
+          #{pointInventoryNo}, 
+          #{pointInventoryMemberId},   
+          #{pointInventoryItemNo},     
+          #{pointInventoryItemAmount},
+          #{pointInventoryItemType}
+      )
+  </insert>
+  
+  <update id="update">
+      UPDATE point_inventory
+      SET
+          point_inventory_member_id = #{pointInventoryMemberId},  point_inventory_item_no = #{pointInventoryItemNo},
+          point_inventory_item_amount = #{pointInventoryItemAmount},
+          point_inventory_item_type = #{pointInventoryItemType}   WHERE
+          point_inventory_no = #{pointInventoryNo}
+  </update>
+  
+  <select id="selectList" resultType="PointInventoryDto">
+      SELECT * FROM point_inventory
+      WHERE point_inventory_member_id = #{pointInventoryMemberId}
+      ORDER BY point_inventory_no DESC
+  </select>
+  
+  <select id="selectOneNumber" resultType="PointInventoryDto">
+      SELECT * FROM point_inventory
+      WHERE point_inventory_no = #{pointInventoryNo}
+  </select>
+ 
+  <delete id="delete">
+      DELETE FROM point_inventory
+      WHERE point_inventory_no = #{pointInventoryNo}
+  </delete>
+  
+</mapper>

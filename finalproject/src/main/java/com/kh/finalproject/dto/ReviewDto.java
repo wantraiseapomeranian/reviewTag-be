@@ -5,10 +5,11 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,12 +21,13 @@ public class ReviewDto {
 	private Long reviewNo; //리뷰 넘버
 	private Long reviewContents; //영화id 외래키
 	private String reviewWriter; //리뷰 작성자(멤버id 외래키)
-	@Size(max = 5)
+	@Min(0)
+	@Max(5)
 	private Integer reviewRating; //리뷰 별점
 	@NotBlank
 	private String reviewSpoiler; //리뷰 스포체크
 	@NotBlank
-	private String reviewtext; //리뷰 내용
+	private String reviewText; //리뷰 내용
 	@PositiveOrZero
 	@NotNull
 	private Integer reviewLike; //리뷰 좋아요

@@ -7,13 +7,13 @@
 	<!-- 등록 -->
 	<insert id="insert">
 		insert into review(
-			review_no, review_movie, review_writer, review_rating,
-			review_spoiler, review_content, review_like,
+			review_no, review_contents, review_writer, review_rating,
+			review_spoiler, review_text, review_like,
             review_realiability
 		)
 		values(
-			review_sql.nextval, #{reviewMovie}, #{reviewWriter},
-			#{reviewRating}, #{reviewSpoiler}, #{reviewContent},
+			review_seq.nextval, #{reviewContents}, #{reviewWriter},
+			#{reviewRating}, #{reviewSpoiler}, #{reviewText},
 			0, 0
 		)
 	</insert>
@@ -22,11 +22,18 @@
 	<select id="selectList" resultType="ReviewDto">
 		select * from review order by review_no desc
 	</select>
+	
+	<!-- 상세조회 -->
+	<select id="selectOne" resultType="ReviewDto">
+		select * from review where
+		review_no = #{reviewNo}
+	</select>
+	
 	<!-- 컨텐츠 제목으로 조회 -->
-	<select id="selectOne" resultType="ReviewDto">	
+	<select id="detail" resultType="ReviewDto">	
 		select A.* from review A join contents B  on A.review_contents
 		= B.contents_id where instr(B.contents_title, #{contentsTitle}) > 0  
-		order by A.review_wtime desc;
+		order by A.review_wtime desc
 	</select>
 	
 	<!-- 수정 -->

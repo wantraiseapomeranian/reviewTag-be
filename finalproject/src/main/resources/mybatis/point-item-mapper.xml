@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="pointitem"> <select id="sequence" resultType="int">
+      SELECT seq_point_item.nextval FROM dual
+  </select>
+
+  <insert id="insert">
+      INSERT INTO point_item(  
+          point_item_no, 
+          point_item_name, 
+          point_item_type, 
+          point_item_content, 
+          point_item_price, 
+          point_item_stock
+      )
+      VALUES(
+          #{pointItemNo}, 
+          #{pointItemName}, 
+          #{pointItemType}, 
+          #{pointItemContent},
+          #{pointItemPrice}, 
+          #{pointItemStock}
+      )
+  </insert>
+  
+  <update id="update">
+      UPDATE point_item
+      SET
+          point_item_name = #{pointItemName},
+          point_item_type = #{pointItemType},     point_item_content = #{pointItemContent}, point_item_price = #{pointItemPrice},     point_item_stock = #{pointItemStock}
+      WHERE
+          point_item_no = #{pointItemNo}
+  </update>
+  
+  <select id="selectList" resultType="PointItemDto">
+      SELECT * FROM point_item
+      ORDER BY point_item_no DESC
+  </select>
+  
+  <select id="selectOneNumber" resultType="PointItemDto">
+      SELECT * FROM point_item
+      WHERE point_item_no = #{pointItemNo}
+  </select>
+ 
+  <delete id="delete">
+      DELETE FROM point_item
+      WHERE point_item_no = #{pointItemNo}
+  </delete>
+  
+</mapper>
