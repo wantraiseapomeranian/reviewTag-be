@@ -1,6 +1,7 @@
 package com.kh.finalproject.aop;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.kh.finalproject.error.UnauthorizationException;
@@ -10,6 +11,7 @@ import com.kh.finalproject.vo.TokenVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Service
 public class MemberInterceptor implements HandlerInterceptor {
 
 	@Autowired
