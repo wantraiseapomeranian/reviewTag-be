@@ -6,7 +6,7 @@
 <mapper namespace="pointhistory">
 
   <select id="sequence" resultType="int">
-      SELECT point_history_seq.nextval FROM dual
+      SELECT seq_point_history.nextval FROM dual
   </select>
 
   <insert id="insert">
@@ -18,12 +18,43 @@
           point_history_item_no
       )
       VALUES(
-          #{pointHistoryNo}, 
+          seq_point_history.nextval, 
           #{pointHistoryMemberId}, 
           #{pointHistoryAmount}, 
-          #{pointHistoryReason},  #{pointHistoryItemNo, jdbcType=NUMERIC} 
+          #{pointHistoryReason},  
+          #{pointHistoryItemNo, jdbcType=NUMERIC} 
        )
   </insert>
+  
+  <select id="selectListByMemberId" resultType="PointHistoryDto">
+      SELECT 
+          point_history_no as pointHistoryNo,
+          point_history_member_id as pointHistoryMemberId,
+          point_history_item_no as pointHistoryItemNo,
+          point_history_amount as pointHistoryAmount,
+          point_history_reason as pointHistoryReason,
+          point_history_date as pointHistoryDate
+      FROM point_history
+      WHERE point_history_member_id = #{memberId}
+      ORDER BY point_history_no DESC
+  </select>
+  
+  <select id="selectOneNumber" resultType="PointHistoryDto">
+      SELECT 
+          point_history_no as pointHistoryNo,
+          point_history_member_id as pointHistoryMemberId,
+          point_history_item_no as pointHistoryItemNo,
+          point_history_amount as pointHistoryAmount,
+          point_history_reason as pointHistoryReason,
+          point_history_date as pointHistoryDate
+      FROM point_history
+      WHERE point_history_no = #{pointHistoryNo}
+  </select>
+ 
+  <delete id="delete">
+      DELETE FROM point_history
+      WHERE point_history_no = #{pointHistoryNo}
+  </delete>
   
   <update id="update">
       UPDATE point_history
@@ -34,21 +65,5 @@
       WHERE
           point_history_no = #{pointHistoryNo}
   </update>
-  
-  <select id="selectList" resultType="PointHistoryDto">
-      SELECT * FROM point_history
-      WHERE point_history_member_id = #{memberId}
-      ORDER BY point_history_no DESC
-  </select>
-  
-  <select id="selectOneNumber" resultType="PointHistoryDto">
-      SELECT * FROM point_history
-      WHERE point_history_no = #{pointHistoryNo}
-  </select>
- 
-  <delete id="delete">
-      DELETE FROM point_history
-      WHERE point_history_no = #{pointHistoryNo}
-  </delete>
   
 </mapper>

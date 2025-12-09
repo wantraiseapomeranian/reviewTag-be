@@ -1,21 +1,27 @@
 package com.kh.finalproject.dto;
-
-import java.sql.Date; // 또는 java.sql.Timestamp
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class PointItemDto {
-    private long pointItemNo;        // 상품 번호 (PK)
-    private String pointItemName;    // 상품 이름
-    private String pointItemType;    // 상품 종류 (예: FOOD, TICKET)
-    private String pointItemContent; // 상품 설명
-    private int pointItemPrice;      // 가격 (포인트)
-    private int pointItemStock;      // 재고 수량
-    private Date pointItemRegDate;   // 등록일
+    private int pointItemNo;
+    private String pointItemName;
+    private String pointItemType;
+    private String pointItemContent;
+    private int pointItemPrice;
+    private int pointItemStock;
+    private String pointItemSrc;      // 이미지
+    private String pointItemReqLevel; // ★ 필수 등급 (일반회원/우수회원/관리자)
+    private Timestamp pointItemRegDate;
+    private int pointItemUniques;
 }

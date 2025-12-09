@@ -18,8 +18,7 @@
           point_inventory_item_type
       )
       VALUES(
-          #{pointInventoryNo}, 
-          #{pointInventoryMemberId},   
+          seq_point_inventory.nextval, #{pointInventoryMemberId},   
           #{pointInventoryItemNo},     
           #{pointInventoryItemAmount},
           #{pointInventoryItemType}
@@ -34,17 +33,39 @@
           point_inventory_item_type = #{pointInventoryItemType}   WHERE
           point_inventory_no = #{pointInventoryNo}
   </update>
-  
+  <select id="selectOneNumber" resultType="PointInventoryDto">
+        SELECT * FROM point_inventory
+        WHERE point_inventory_no = #{pointInventoryNo}
+    </select>
   <select id="selectList" resultType="PointInventoryDto">
       SELECT * FROM point_inventory
       WHERE point_inventory_member_id = #{pointInventoryMemberId}
       ORDER BY point_inventory_no DESC
   </select>
   
-  <select id="selectOneNumber" resultType="PointInventoryDto">
-      SELECT * FROM point_inventory
-      WHERE point_inventory_no = #{pointInventoryNo}
-  </select>
+<select id="selectListByMemberId" resultType="PointInventoryDto">
+        SELECT 
+            I.point_inventory_no as pointInventoryNo,
+            I.point_inventory_member_id as pointInventoryMemberId,
+            I.point_inventory_item_no as pointInventoryItemNo,
+            I.point_inventory_item_amount as pointInventoryItemAmount,
+            I.point_inventory_item_type as pointInventoryItemType,
+            I.point_inventory_purchase_date as pointInventoryPurchaseDate,
+            
+            P.point_item_name as pointItemName,
+            P.point_item_src as pointItemSrc
+        FROM point_inventory I
+        LEFT JOIN point_item P ON I.point_inventory_item_no = P.point_item_no
+        WHERE I.point_inventory_member_id = #{memberId}
+        ORDER BY I.point_inventory_no DESC
+    </select>
+  
+  <select id="selectCountMyItem" resultType="int">
+        SELECT COUNT(*)
+        FROM point_inventory
+        WHERE point_inventory_member_id = #{memberId}
+          AND point_inventory_item_no = #{itemNo}
+    </select>
  
   <delete id="delete">
       DELETE FROM point_inventory

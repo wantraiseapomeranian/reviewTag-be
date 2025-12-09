@@ -39,4 +39,20 @@ public class PointInventoryDao {
     public boolean delete(long pointInventoryNo) {
         return sqlSession.delete("pointinventory.delete", pointInventoryNo) > 0;
     }
+
+    public List<PointInventoryDto> selectListByMemberId(String loginId) {
+        return sqlSession.selectList("pointinventory.selectListByMemberId", loginId);
+    }
+
+public int selectCountMyItem(String receiverId, long itemNo) {
+        
+        // 1. 검색 조건을 담을 빈 DTO 객체 생성
+        PointInventoryDto params = new PointInventoryDto();
+        
+   
+        params.setPointInventoryMemberId(receiverId);
+        params.setPointInventoryItemNo((int)itemNo); 
+
+        return sqlSession.selectOne("pointinventory.selectCountMyItem", params);
+    }
 }

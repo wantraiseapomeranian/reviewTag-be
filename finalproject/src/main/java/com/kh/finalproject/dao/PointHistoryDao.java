@@ -23,9 +23,8 @@ public class PointHistoryDao {
     }
 
     /* 3.(1) 목록 출력 R */
-    public List<PointHistoryDto> selectList(String memberId) {
-        // 받아온 memberId를 MyBatis에 넘겨줌
-        return sqlSession.selectList("pointhistory.selectList", memberId);
+    public List<PointHistoryDto> selectListByMemberId(String memberId) {
+        return sqlSession.selectList("pointhistory.selectListByMemberId", memberId);
     }
 
     /* 3.(2) 번호 기준 조회 R */

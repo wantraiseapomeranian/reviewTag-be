@@ -12,7 +12,6 @@ public class PointItemDao {
     @Autowired
     private SqlSession sqlSession;
 
-    /* 시퀀스 번호 추출 (필요시 사용) */
     public int sequence() {
         return sqlSession.selectOne("pointitem.sequence");
     }
