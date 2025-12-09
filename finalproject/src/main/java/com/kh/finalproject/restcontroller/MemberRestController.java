@@ -108,8 +108,6 @@ public class MemberRestController {
 	@PostMapping("/login")
 	public MemberLoginResponseVO login(@RequestBody MemberDto memberDto) {
 		MemberDto findDto = memberDao.selectOne(memberDto.getMemberId());
-		System.out.println(memberDto);
-		System.out.println(findDto);
 		if(findDto == null) throw new TargetNotfoundException("로그인 오류 - 존재하지 않는 계정");
 		//비밀번호 검사
 			boolean valid = passwordEncoder.matches(memberDto.getMemberPw(), findDto.getMemberPw());

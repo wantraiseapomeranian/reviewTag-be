@@ -45,7 +45,6 @@ public class TokenRenewalInterceptor implements HandlerInterceptor{
 			// 발급한 토큰을 클라이언트(응답 헤더)에게 전송
 	        response.setHeader("Access-Control-Expose-Headers", "Access-Token"); 
 	        response.setHeader("Access-Token", newAccessToken); 
-	        System.out.println("토큰 통과");
 	        return true;
 		}
 		catch(ExpiredJwtException e) {
@@ -55,7 +54,6 @@ public class TokenRenewalInterceptor implements HandlerInterceptor{
 			Map<String, String> body = new HashMap<>();
 				body.put("status", "401");
 				body.put("message", "TOKEN_EXPIRED");
-				System.out.println("토큰 만료 오류");
 			ObjectMapper mapper = new ObjectMapper(); // JSON 수동 생성기
 			String json = mapper.writeValueAsString(body); // JSON 생성
 			response.getWriter().write(json);
