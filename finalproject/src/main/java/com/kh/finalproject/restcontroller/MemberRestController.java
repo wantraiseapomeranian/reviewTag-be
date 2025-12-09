@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.finalproject.dao.MemberDao;
+import com.kh.finalproject.dao.MemberReviewDao;
 import com.kh.finalproject.dao.MemberTokenDao;
 import com.kh.finalproject.dto.MemberDto;
 import com.kh.finalproject.error.TargetNotfoundException;
@@ -23,6 +24,7 @@ import com.kh.finalproject.error.UnauthorizationException;
 import com.kh.finalproject.service.TokenService;
 import com.kh.finalproject.vo.MemberLoginResponseVO;
 import com.kh.finalproject.vo.MemberRefreshVO;
+import com.kh.finalproject.vo.MemberReviewListVO;
 import com.kh.finalproject.vo.TokenVO;
 
 @CrossOrigin
@@ -38,7 +40,8 @@ public class MemberRestController {
 	private TokenService tokenService;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+	@Autowired
+	private MemberReviewDao memberReviewDao;
 	
 	/// 회원가입
 	@PostMapping("/")
@@ -100,7 +103,6 @@ public class MemberRestController {
 		originDto.setMemberPw(memberDto.getMemberPw());
 		memberDao.updatePassword(originDto);
 	}
-	//포인트 갱신
 	
 	//신뢰도 갱신
 	
@@ -159,4 +161,11 @@ public class MemberRestController {
 					.refreshToken(tokenService.generateRefreshToken(tokenVO))
 				.build();
 	}
+	
+	// 마이페이지 조회용
+	@GetMapping("/myreview/{loginId}")
+	public List<MemberReviewListVO> selectList(@PathVariable String loginId){
+		return memberReviewDao.selectList(loginId);
+	}
+	
 }
