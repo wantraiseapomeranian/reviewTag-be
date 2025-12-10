@@ -50,11 +50,7 @@ public class TmdbDataRestController {
 	    }
 	    
 		
-		/**
-	     * 1. [검색 엔드포인트] 영화/TV 제목 검색 (TMDB API 호출)
-	     * React 호출 예시: GET /api/tmdb/search?query=검색어
-	     * @return SearchResultDto 목록 (클라이언트 목록 표시에 사용)
-	     */
+		// 검색어로 api 조회 & 검색 결과 list 반환 
 		@GetMapping("/search")
 		public ResponseEntity<List<SearchResultDto>> searchContents(@RequestParam String query) {
 			 // 검색어 유효성 검증
@@ -67,11 +63,8 @@ public class TmdbDataRestController {
 	        return ResponseEntity.ok(results); // 200 OK와 함께 JSON 데이터 반환
 		}
 		
-		/**
-	     * 2. [저장 엔드포인트] 클라이언트가 선택한 컨텐츠 ID를 상세 조회 후 DB에 저장
-	     * React 호출 예시: POST /api/tmdb/save (JSON Body 포함)
-	     * @return 저장된 컨텐츠의 상세 정보 (장르 이름 포함)
-	     */
+		
+		// 선택한 api 데이터를 DB에 저장 후 반환
 	    @PostMapping("/save")
 	    public ResponseEntity<ContentsDetailDto> saveSelectedContent(@RequestBody SaveRequestVO requestVO) {
 	        // 요청 데이터 유효성 검증
@@ -96,25 +89,26 @@ public class TmdbDataRestController {
 	        }
 	    }
 	    
-	    /*
-	     * DB에 저장된 특정 컨텐츠의 상세 정보와 장르 리스트를 조회합니다.
-	     * 예시: http://localhost:8080/api/tmdb/content/detail/11
-	     */
+	    
+	    //컨텐츠 상세
 	    @GetMapping("/contents/detail/{contentsId}")
 	    public ContentsDetailDto getContentDetail(@PathVariable Long contentsId) {
 	        return tmdbApiService.getContentDetailWithGenres(contentsId);
 	    }
 	    
-	    /* 장르 목록 */
+	    
+	    //장르 목록
 	    @GetMapping("/genre")
 	    public List<GenreDto> genreList() {
 	    	return genreDao.selectGenre();
 	    }
+	    
  	    
+	    //장르별 리스트
 	    @GetMapping("/contents/list/{genreName}")
 	    public List<ContentsDetailDto> selectListByGenre(@PathVariable(required = false) String genreName, 
 	            @RequestParam(defaultValue = "1") Integer page) {
-	    	int size = 12; // 한 페이지당 보여줄 개수 (프론트엔드와 맞춰주세요)
+	    	int size = 12; // 한 페이지당 보여줄 개수 
 	        
 	        // Oracle 페이징 계산 (1페이지: 1~12, 2페이지: 13~24 ...)
 	        int end = page * size;
@@ -125,7 +119,7 @@ public class TmdbDataRestController {
 	        params.put("end", end);
 	        
 	        if(genreName == null || genreName.equals("all") || genreName.equals("전체")) {
-		        List<ContentsDetailDto> list = contentsDao.selectContentList(params);
+		        List<ContentsDetailDto> list = contentsDao.selectContentsList(params);
 		        return list;
 	        }
 
@@ -134,5 +128,29 @@ public class TmdbDataRestController {
 
 	    	List<ContentsDetailDto> list = contentsDao.selectListByGenre(params);
 	    	return list;
+	    }
+	    
+	    //타입 별 리스트
+	    //tv
+	    @GetMapping("/contents/list/tv")
+	    public List<ContentsDetailDto> selectTvList() {
+	    	
+	        Map<String, Object> params = new HashMap<>();
+	        params.put("type", "tv");
+
+	        
+	        List<ContentsDetailDto> list = contentsDao.selectContentsListByType(params);
+	        return list;
+	    }
+	    //movie
+	    @GetMapping("/contents/list/movie")
+	    public List<ContentsDetailDto> selectMovieList() {
+	    	
+	        Map<String, Object> params = new HashMap<>();
+	        params.put("type", "movie");
+
+	        
+	        List<ContentsDetailDto> list = contentsDao.selectContentsListByType(params);
+	        return list;
 	    }
 }

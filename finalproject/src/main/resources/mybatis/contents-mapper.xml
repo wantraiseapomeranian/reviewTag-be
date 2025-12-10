@@ -139,7 +139,7 @@
         ORDER BY MAIN.contents_release_date DESC
     </select>
     
-    <select id="selectContentList" resultMap="contentDetailMap" parameterType="map">
+    <select id="selectContentsList" resultMap="contentDetailMap" parameterType="map">
         SELECT 
             MAIN.*, 
             CG.genre_name AS genre_name_alias
@@ -159,6 +159,20 @@
         LEFT JOIN contents_genre CG ON CGM.genre_id = CG.genre_id
         
         ORDER BY MAIN.contents_release_date DESC
+    </select>
+    
+     <select id="selectContentsListByType" resultMap="contentDetailMap" parameterType="map">
+       SELECT 
+            C.*, 
+            CG.genre_name AS genre_name_alias
+        FROM 
+            contents C
+        LEFT JOIN contents_genre_map CGM ON C.contents_id = CGM.contents_id
+        LEFT JOIN contents_genre CG ON CGM.genre_id = CG.genre_id
+        WHERE 
+            C.contents_type = #{type}
+        ORDER BY 
+            C.contents_release_date DESC
     </select>
     
     <select id="selectGenreList" resultType="GenreDto">

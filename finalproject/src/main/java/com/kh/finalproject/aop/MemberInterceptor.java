@@ -32,6 +32,8 @@ public class MemberInterceptor implements HandlerInterceptor {
 			// 토큰 해석
 			TokenVO tokenVO = tokenService.parse(bearerToken);
 			
+			request.setAttribute("tokenVO", tokenVO);
+			
 			// 정보 저장
 			request.setAttribute("loginId", tokenVO.getLoginId()); 
 			request.setAttribute("loginLevel", tokenVO.getLoginLevel()); 

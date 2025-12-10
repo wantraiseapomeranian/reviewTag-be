@@ -24,12 +24,16 @@ public class ContentsDao {
     public ContentsDetailDto selectContentDetailWithGenres(Long contentsId) {
     	return sqlSession.selectOne("contents.selectContentDetailWithGenres", contentsId);
     }
-    //장르별 컨텐츠 목록 조회
+    //장르별 컨텐츠 목록 조회(페이징)
     public List<ContentsDetailDto> selectListByGenre(Map<String, Object> params) {
     	return sqlSession.selectList("contents.selectContentsByGenre", params);
     }
- // 전체 컨텐츠 목록 조회 (페이징)
-    public List<ContentsDetailDto> selectContentList(Map<String, Object> params) {
-        return sqlSession.selectList("contents.selectContentList", params);
+    //전체 컨텐츠 목록 조회 (페이징)
+    public List<ContentsDetailDto> selectContentsList(Map<String, Object> params) {
+        return sqlSession.selectList("contents.selectContentsList", params);
+    }
+    //타입별 컨텐츠 목록 조회(페이징)
+    public List<ContentsDetailDto> selectContentsListByType(Map<String, Object> params) {
+    	return sqlSession.selectList("contents.selectContentsListByType", params);
     }
  }

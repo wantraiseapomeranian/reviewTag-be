@@ -40,6 +40,13 @@
 <!-- 		order by A.review_wtime desc -->
 <!-- 	</select> -->
 	
+	<!-- 컨텐츠 아이디로 조회 -->
+	<select id="selectListByContentsId" resultType="ReviewDto">
+		select * from review where review_contents = #{reviewContents}
+		order by review_wtime desc
+	</select>
+	
+	
 	<!-- 수정 -->
 	<update id="updateUnit"> 
 		update review 
@@ -62,6 +69,18 @@
 		delete review where review_no = #{reviewNo}
 	</delete>
 	
+
+	<!-- 좋아요 관련 -->
 	
+	<update id="updateReviewLike">
+		update review set review_like = (
+				select count(*) from review_like where review_no = #{reviewNo}
+		)	where review_no = #{reviewNo}
+	</update>
+	
+	<update id="updateReviewReviewLike">
+		update review set review_like = #{count} where review_no = #{reviewNo}
+	</update>
+
 	
 </mapper>

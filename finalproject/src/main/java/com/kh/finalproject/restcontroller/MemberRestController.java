@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kh.finalproject.dao.MemberDao;
 import com.kh.finalproject.dao.MemberReviewDao;
 import com.kh.finalproject.dao.MemberTokenDao;
+import com.kh.finalproject.dao.MemberWatchDao;
 import com.kh.finalproject.dto.MemberDto;
 import com.kh.finalproject.error.TargetNotfoundException;
 import com.kh.finalproject.error.UnauthorizationException;
@@ -25,6 +26,7 @@ import com.kh.finalproject.service.TokenService;
 import com.kh.finalproject.vo.MemberLoginResponseVO;
 import com.kh.finalproject.vo.MemberRefreshVO;
 import com.kh.finalproject.vo.MemberReviewListVO;
+import com.kh.finalproject.vo.MemberWatchListVO;
 import com.kh.finalproject.vo.TokenVO;
 
 @CrossOrigin
@@ -42,6 +44,8 @@ public class MemberRestController {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private MemberReviewDao memberReviewDao;
+	@Autowired
+	private MemberWatchDao memberWatchDao;
 	
 	/// 회원가입
 	@PostMapping("/")
@@ -161,11 +165,17 @@ public class MemberRestController {
 					.refreshToken(tokenService.generateRefreshToken(tokenVO))
 				.build();
 	}
-	
-	// 마이페이지 조회용
+	//////////////////////////////////
+	/// 마이페이지 조회용
+	// 등록한 리뷰
 	@GetMapping("/myreview/{loginId}")
-	public List<MemberReviewListVO> selectList(@PathVariable String loginId){
+	public List<MemberReviewListVO> selectReviewList(@PathVariable String loginId){
 		return memberReviewDao.selectList(loginId);
+	}
+	// 찜한 콘텐츠 목록
+	@GetMapping("/mywatch/{loginId}")
+	public List<MemberWatchListVO> selectWatchList(@PathVariable String loginId){
+		return memberWatchDao.selectList(loginId);
 	}
 	
 }

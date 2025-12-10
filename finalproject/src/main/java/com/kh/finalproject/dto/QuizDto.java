@@ -18,7 +18,7 @@ public class QuizDto {
 	private Long quizId;
 	
 	//외래키 설정
-	private Long quizMovieId;
+	private Long quizContentsId;
 	private String quizCreatorId;
 	
 	//퀴즈 제목과 타입 설정

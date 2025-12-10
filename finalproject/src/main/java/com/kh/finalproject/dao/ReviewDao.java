@@ -26,6 +26,7 @@ public class ReviewDao {
 		return sqlSession.selectList("review.selectList", reviewContents);
 	}
 	
+
 	//내리뷰 조회
 //	public ReviewDto selectByUserAndContents(
 //			@Param("loginId") String loginId,
@@ -39,6 +40,12 @@ public class ReviewDao {
 	    return sqlSession.selectOne("review.selectByUserAndContents", map);
 	}
 	
+
+	//contentsId로 list 조회
+	public List<ReviewDto> selectListByContentsId (Long reviewContents) {
+		return sqlSession.selectList("review.selectListByContentsId", reviewContents);
+	}
+
 	
 	public ReviewDto selectOne(Long reviewNo) {
 		return sqlSession.selectOne("review.selectOne", reviewNo);
@@ -57,4 +64,20 @@ public class ReviewDao {
 	public boolean delete(Long reviewNo) {
 		return sqlSession.delete("review.delete", reviewNo) > 0;
 	}
+	
+	
+	//////////////////////////////////////////
+	
+	//좋아요 관련
+	public void updateReviewLike(Long reviewNo) {
+		sqlSession.update("review.updateReviewLike", reviewNo);
+	}
+	
+	public void updateReviewReviewLike(Long reviewNo, Long count) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("reviewNo", reviewNo);
+		params.put("count", count);
+		sqlSession.update("review.updateReviewReviewLike", params);
+	}
+
 }
