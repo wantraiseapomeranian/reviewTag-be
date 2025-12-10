@@ -16,7 +16,10 @@ public class PointHistoryDao {
     public int insert(PointHistoryDto pointHistoryDto) { 
         return sqlSession.insert("pointhistory.insert", pointHistoryDto);
     }
-
+    
+    public int insertHistory(PointHistoryDto pointHistoryDto) { 
+        return sqlSession.insert("pointhistory.inserthistory", pointHistoryDto);
+    }
     /* 2. 수정 U */
     public boolean update(PointHistoryDto pointHistoryDto) {
         return sqlSession.update("pointhistory.update", pointHistoryDto) > 0;

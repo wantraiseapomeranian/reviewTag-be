@@ -25,7 +25,20 @@
           #{pointHistoryItemNo, jdbcType=NUMERIC} 
        )
   </insert>
-  
+<insert id="inserthistory">
+    INSERT INTO point_history(
+        point_history_no,
+        point_history_member_id,
+        point_history_amount,
+        point_history_reason
+    )
+    VALUES(
+        seq_point_history.nextval,
+       #{pointHistoryMemberId},
+        #{pointHistoryAmount},
+        #{pointHistoryReason}
+    )
+</insert>
   <select id="selectListByMemberId" resultType="PointHistoryDto">
       SELECT 
           point_history_no as pointHistoryNo,

@@ -1,11 +1,14 @@
 package com.kh.finalproject.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kh.finalproject.dao.*;
 import com.kh.finalproject.dto.*;
+import com.kh.finalproject.vo.PointItemWishVO;
 
 @Service
 public class PointService {
@@ -14,7 +17,7 @@ public class PointService {
     @Autowired private MemberDao memberDao;
     @Autowired private PointInventoryDao pointInventoryDao;
     @Autowired private PointHistoryDao pointHistoryDao;
-
+    @Autowired private PointWishlistDao pointWishlistDao;
     // 등급 점수 변환
     private int getLevelWeight(String level) {
         if (level == null) return 0;
@@ -225,5 +228,82 @@ public class PointService {
         history.setPointHistoryReason("아이템 사용: " + item.getPointItemName());
         history.setPointHistoryItemNo(item.getPointItemNo());
         pointHistoryDao.insert(history);
+    }
+    @Transactional
+    public boolean toggleWish(String loginId, int itemNo) {
+        // DAO에 전달할 VO 생성
+        PointItemWishVO vo = PointItemWishVO.builder()
+                            .memberId(loginId)
+                            .itemNo(itemNo)
+                            .build();
+
+        // 찜 여부 확인
+        int count = pointWishlistDao.checkWish(vo); 
+        
+        if (count > 0) {
+            pointWishlistDao.delete(vo); // 이미 찜했으면 삭제
+            return false;
+        } else {
+            pointWishlistDao.insert(vo); // 찜하지 않았으면 추가
+            return true;
+        }
+    }
+
+    // 내 찜 아이템 번호 리스트 조회
+    public List<Integer> getMyWishItemNos(String loginId) {
+        return pointWishlistDao.selectMyWishItemNos(loginId);
+    }
+ // 내 찜 목록 전체 조회
+    public List<PointWishlistDto> getMyWishlist(String loginId) {
+        return pointWishlistDao.selectMyWishlist(loginId);
+    }
+    //찜목록 삭제
+    @Transactional
+    public void deleteWish(String loginId, int itemNo) {
+        // ★ [디버깅용 로그 추가] 콘솔창에 이 값이 찍히는지 확인하세요!
+        System.out.println(">>> 찜 삭제 요청 도착!");
+        System.out.println("요청자(ID): " + loginId);
+        System.out.println("지울 상품번호(ItemNo): " + itemNo);
+
+        // VO 생성
+        PointItemWishVO vo = PointItemWishVO.builder()
+                            .memberId(loginId)
+                            .itemNo(itemNo)
+                            .build();
+        
+        // 삭제 실행 (이게 실행돼도 조건 안맞으면 0개 삭제됨)
+        pointWishlistDao.delete(vo);
+        
+        System.out.println(">>> 삭제 쿼리 실행 완료");
+    }
+    
+    @Transactional
+    public void addAttendancePoint(String loginId, int amount, String memo) {
+
+        // 1) 현재 회원 정보 조회
+        MemberDto member = memberDao.selectOne(loginId);
+        if (member == null) {
+            throw new IllegalStateException("회원이 존재하지 않습니다: " + loginId);
+        }
+
+        // 2) 현재 포인트 + 지급 포인트 계산
+        int newPoint = member.getMemberPoint() + amount;
+        member.setMemberPoint(newPoint);
+
+        // 3) 업데이트
+        boolean result = memberDao.updatePoint(member);
+        if (!result) {
+            throw new IllegalStateException("포인트 업데이트 실패: " + loginId);
+        }
+
+        // 4) 포인트 히스토리 기록 (있다면)
+        PointHistoryDto dto = PointHistoryDto.builder()
+                .pointHistoryMemberId(loginId)
+                .pointHistoryAmount(amount)
+                .pointHistoryReason(memo)
+                .build();
+        pointHistoryDao.insertHistory(dto);
+
+        System.out.println(loginId + "님에게 " + amount + "포인트 지급 완료 ▶ 현재 포인트: " + newPoint);
     }
 }
