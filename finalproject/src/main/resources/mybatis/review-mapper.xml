@@ -65,4 +65,17 @@
 		delete review where review_no = #{reviewNo}
 	</delete>
 	
+	
+	<!-- 좋아요 관련 -->
+	
+	<update id="updateReviewLike">
+		update review set review_like = (
+				select count(*) from review_like where review_no = #{reviewNo}
+		)	where review_no = #{reviewNo}
+	</update>
+	
+	<update id="updateReviewReviewLike">
+		update review set review_like = #{count} where review_no = #{reviewNo}
+	</update>
+	
 </mapper>

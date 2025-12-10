@@ -1,6 +1,8 @@
 package com.kh.finalproject.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,4 +47,20 @@ public class ReviewDao {
 	public boolean delete(Long reviewNo) {
 		return sqlSession.delete("review.delete", reviewNo) > 0;
 	}
+	
+	
+	//////////////////////////////////////////
+	
+	//좋아요 관련
+	public void updateReviewLike(Long reviewNo) {
+		sqlSession.update("review.updateReviewLike", reviewNo);
+	}
+	
+	public void updateReviewReviewLike(Long reviewNo, Long count) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("reviewNo", reviewNo);
+		params.put("count", count);
+		sqlSession.update("review.updateReviewReviewLike", params);
+	}
+
 }
