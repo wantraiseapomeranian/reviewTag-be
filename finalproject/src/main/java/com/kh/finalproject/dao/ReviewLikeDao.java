@@ -26,7 +26,7 @@ public class ReviewLikeDao {
 		params.put("memberId", memberId);
 		params.put("reviewNo", reviewNo);
 		Long count =  sqlSession.selectOne("reviewLike.countForCheck", params);
-		return count > 0;
+		return count != null && count > 0;
 	}
 	
 	public void delete (String memberId, Long reviewNo) {

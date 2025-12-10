@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.finalproject.dao.ReviewDao;
@@ -86,8 +87,8 @@ public class ReviewRestController {
 	//좋아요 관련
 	
 	
-	@PostMapping("/check/{reviewNo}/{loginId}")
-	public ReviewLikeVO check(@PathVariable String loginId, @PathVariable Long reviewNo) {
+	@PostMapping("/check")
+	public ReviewLikeVO check(@RequestParam String loginId, @RequestParam Long reviewNo) {
 		boolean like = reviewLikeDao.check(loginId, reviewNo);
 		Long count = reviewLikeDao.countByReviewNo(reviewNo);
 		return ReviewLikeVO.builder().like(like).count(count).build();
