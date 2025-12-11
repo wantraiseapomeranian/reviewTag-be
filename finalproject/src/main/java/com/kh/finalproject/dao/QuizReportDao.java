@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.kh.finalproject.dto.QuizReportDto;
+import com.kh.finalproject.vo.QuizReportDetailVO;
+import com.kh.finalproject.vo.QuizReportStatsVO;
 
 @Repository
 public class QuizReportDao {
@@ -60,5 +62,15 @@ public class QuizReportDao {
 		
 	    return sqlSession.delete("quizReport.delete", quizReportId) > 0;
 	}
+	
+	//신고된 퀴즈 목록 조회
+	public List<QuizReportStatsVO> selectReportedQuizList() {
+        return sqlSession.selectList("quizReport.selectQuizReportList");
+    }
+	
+	//특정 퀴즈의 기타 신고 상세 내역 조회
+	public List<QuizReportDetailVO> selectReportDetails(int quizId) {
+        return sqlSession.selectList("quizReport.selectReportEtcDetails", quizId);
+    }
 
 }

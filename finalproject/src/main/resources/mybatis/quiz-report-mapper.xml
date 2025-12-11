@@ -67,4 +67,27 @@
     	delete from quiz_report 
     	where quiz_report_id = #{quizReportId}
 	</delete>
+	
+	<!-- 신고된 퀴즈 목록 조회 -->
+	<select id="selectQuizReportList" resultType="QuizReportStatsVO">
+        select * from view_quiz_report_stats
+        order by last_reported_at desc
+    </select>
+	
+	<!-- 상세 신고 사유 조회 -->
+    <select id="selectReportEtcDetails" parameterType="int" resultType="QuizReportDetailVO">
+        select
+            m.member_nickname AS memberNickname,
+            qr.quiz_report_content AS quizReportContent,
+            qr.quiz_report_date AS quizReportDate
+        from
+            quiz_report qr
+        left join
+            member m ON qr.quiz_report_member_id = m.member_id
+        where
+            qr.quiz_report_quiz_id = #{quizId}
+            AND qr.quiz_report_type = 'ETC'
+        order by
+            qr.quiz_report_date DESC
+    </select>
 </mapper>
