@@ -35,13 +35,15 @@ public class WatchlistDao {
 						.hasWatchlist(count>0)
 					.build();
 	}
-	
+
 //	//수정(타입 변환용)
 	public WatchlistChangeTypeVO updateType(WatchlistDto watchlistDto) {
 		WatchlistChangeTypeVO changeVO = new WatchlistChangeTypeVO();
 		changeVO.setWatchlistMember(watchlistDto.getWatchlistMember());
 		changeVO.setWatchlistContent(watchlistDto.getWatchlistContent());
 		changeVO.setWatchlistType(watchlistDto.getWatchlistType());
+		boolean result = sqlSession.update("watchlist.update",changeVO)>0;
+		changeVO.setChangeResult(result);
 		return changeVO;
 	}
 	

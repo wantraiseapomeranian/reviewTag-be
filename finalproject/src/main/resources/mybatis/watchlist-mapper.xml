@@ -28,7 +28,7 @@
    	</select>
    	
    	<!-- 수정(TYPE 수정용)-->
-   	<update id="update" parameterType="WatchlistDto">
+   	<update id="update" parameterType="WatchlistChangeTypeVO">
    		update watchlist
    		set watchlist_type = #{watchlistType}
    		where watchlist_content=#{watchlistContent}

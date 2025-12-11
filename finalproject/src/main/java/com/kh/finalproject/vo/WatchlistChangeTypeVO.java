@@ -15,5 +15,6 @@ public class WatchlistChangeTypeVO {
 	private String watchlistType;
 	private long watchlistContent;
 	private String watchlistMember;
+	private boolean changeResult;
 	
 }
