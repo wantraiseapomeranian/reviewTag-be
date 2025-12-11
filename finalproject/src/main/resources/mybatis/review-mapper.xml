@@ -12,9 +12,8 @@
             review_realiability, review_price
 		)
 		values(
-			review_seq.nextval, #{reviewContents}, #{reviewWriter},
-			#{reviewRating}, #{reviewSpoiler}, #{reviewText},
-			0, 0, 0
+			review_seq.nextval, #{reviewContents}, #{reviewWriter}, #{reviewRating},
+			 #{reviewSpoiler}, #{reviewText}, 0, 0, #{reviewPrice}
 		)
 	</insert>
 	

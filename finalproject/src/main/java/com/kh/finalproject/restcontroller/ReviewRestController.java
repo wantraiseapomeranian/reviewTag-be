@@ -43,10 +43,10 @@ public class ReviewRestController {
 	}
 	
 	//로그인 리뷰 조회
-	@GetMapping("/user/{reviewContents}/{loginId}")
-	public ReviewDto selectByUserAndContents(@PathVariable String loginId,
+	@GetMapping("/user/{reviewContents}/{reviewWriter}")
+	public ReviewDto selectByUserAndContents(@PathVariable String reviewWriter,
 											@PathVariable Long reviewContents) {
-		ReviewDto reviewDto = reviewDao.selectByUserAndContents(loginId, reviewContents);
+		ReviewDto reviewDto = reviewDao.selectByUserAndContents(reviewWriter, reviewContents);
 		return reviewDto;
 	}
 
