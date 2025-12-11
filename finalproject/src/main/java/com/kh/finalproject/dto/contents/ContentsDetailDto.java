@@ -22,5 +22,7 @@ public class ContentsDetailDto {
 	private String contentsReleaseDate; 
 	private String contentsDirector; 
     private String contentsMainCast; 
-	private List<String> genreNames; 
+	private List<String> genreNames;
+	
+	private Long contentsLike;
 }

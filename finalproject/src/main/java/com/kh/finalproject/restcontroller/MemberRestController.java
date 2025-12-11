@@ -120,10 +120,12 @@ public class MemberRestController {
 			if(valid == false) {
 				throw new TargetNotfoundException("비밀번호 불일치");
 			}
+			
 		//로그인 성공
 			return MemberLoginResponseVO.builder()
 					.loginId(findDto.getMemberId())
 					.loginLevel(findDto.getMemberLevel())
+					.loginNickname(findDto.getMemberNickname())
 					.accessToken(tokenService.generateAccessToken(findDto))
 					.refreshToken(tokenService.generateRefreshToken(findDto))
 				.build();
@@ -177,5 +179,6 @@ public class MemberRestController {
 	public List<MemberWatchListVO> selectWatchList(@PathVariable String loginId){
 		return memberWatchDao.selectList(loginId);
 	}
-	
+
+
 }

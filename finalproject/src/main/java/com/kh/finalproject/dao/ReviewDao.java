@@ -26,12 +26,14 @@ public class ReviewDao {
 	}
 	
 
-	//내리뷰 조회
-//	public ReviewDto selectByUserAndContents(
-//			@Param("loginId") String loginId,
-//			@Param("reviewContents") Long reviewContents) {
-//		return sqlSession.selectOne("review.selectByUserAndContents");
-//	}
+	//단일 조회
+	public ReviewDto selectOne(Long reviewContents , Long reviewNo) {
+		Map<String, Object> map2 = new HashMap<>();
+		map2.put("reviewContents", reviewContents);
+		map2.put("reviewNo", reviewNo);
+		return sqlSession.selectOne("review.selectOne", map2);
+	}
+	
 	public ReviewDto selectByUserAndContents(String loginId, Long reviewContents) {
 	    Map<String, Object> map = new HashMap<>();
 	    map.put("loginId", loginId);

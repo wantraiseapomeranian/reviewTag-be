@@ -36,4 +36,8 @@ public class ContentsDao {
     public List<ContentsDetailDto> selectContentsListByType(Map<String, Object> params) {
     	return sqlSession.selectList("contents.selectContentsListByType", params);
     }
+    //북마크 수 조회
+    public Long selectContentsLike(Long contentsId) {
+    	return sqlSession.selectOne("contents.selectContentsLike", contentsId);
+    }
  }

@@ -47,6 +47,7 @@ public class TokenService {
 				.issuer(jwtProperties.getIssuer()) // 발행자
 				.claim("loginId", memberDto.getMemberId())
 				.claim("loginLevel", memberDto.getMemberLevel())
+				.claim("loginNickname", memberDto.getMemberNickname())
 				//.claim("loginPoint", memberDto.getMemberPoint())
 			.compact();
 	}
@@ -77,6 +78,7 @@ public class TokenService {
 				.issuer(jwtProperties.getIssuer()) // 발행자
 				.claim("loginId", memberDto.getMemberId())
 				.claim("loginLevel", memberDto.getMemberLevel())
+				.claim("loginNickname", memberDto.getMemberNickname())
 				//.claim("loginPoint", memberDto.getMemberPoint())
 			.compact();
 		
@@ -95,6 +97,7 @@ public class TokenService {
 		return generateAccessToken(MemberDto.builder()
 				.memberId(tokenVO.getLoginId())
 				.memberLevel(tokenVO.getLoginLevel())
+				.memberNickname(tokenVO.getLoginNickname())
 				.build());
 	}
 	

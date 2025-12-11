@@ -10,6 +10,7 @@ public class MemberLoginResponseVO {
 	
 	private String loginId;
 	private String loginLevel;
+	private String loginNickname;
 	private String accessToken;
 	private String refreshToken;
 

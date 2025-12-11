@@ -23,18 +23,17 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
             .addPathPatterns(
                 "/member/logout",      // 로그아웃
                 "/point/**",
-                "/review/**",
                 "/content/**",
-                "/quiz/**",
-                "/review/**"
+                "/quiz/**"
+//                "/review/**"
                 // contents 북마크 기능만 추가 나머지 컨텐츠 관련 부분 로그인 없이 허용                
                 // 포인트 관련 전체 (/point/history 등)
                 // "/point/store/**"   // 위 /point/** 가 이미 포함하므로 생략 가능
             )
             .excludePathPatterns(
-                "/point/store/",        // ★ 상품 목록 조회는 로그인 없이 허용
-            	"/review/list/**"	
-            ).order(1);
+                "/point/store/"        // ★ 상품 목록 조회는 로그인 없이 허용
+//            	"/review/list/**"	
+            );
         
         // 2. 토큰 재발급 인터셉터 (로그인 연장)
         registry.addInterceptor(tokenRenewalInterceptor)

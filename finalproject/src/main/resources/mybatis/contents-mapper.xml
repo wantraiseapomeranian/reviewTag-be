@@ -77,8 +77,10 @@
         <result property="contentsRuntime" column="contents_runtime"/>
         <result property="contentsReleaseDate" column="contents_release_date"/>
         
-        <result property="contentsDirector" column="contents_director"/>       <!-- ★ 추가: 감독 매핑 ★ -->
-        <result property="contentsMainCast" column="contents_main_cast"/>     <!-- ★ 추가: 주연 배우 매핑 ★ -->
+        <result property="contentsDirector" column="contents_director"/>       <!--  추가: 감독 매핑 -->
+        <result property="contentsMainCast" column="contents_main_cast"/>     <!-- 주연 배우 매핑  -->
+        
+        <result property="contentsLike" column="contents_like_count"/>		<!-- 좋아요 매핑 -->
         
         <!-- 장르 이름을 List<String> 타입의 genreNames 필드에 모아서 매핑합니다. -->
         <collection property="genreNames" ofType="string">
@@ -102,7 +104,8 @@
     
     <select id="selectContentsByGenre" resultMap="contentDetailMap" parameterType="map">
       SELECT 
-            MAIN.*, 
+            MAIN.*,
+            (SELECT COUNT(*) FROM watchlist WHERE watchlist_content = MAIN.contents_id) AS contents_like_count, 
             CG.genre_name AS genre_name_alias
         FROM (
             SELECT * FROM (
@@ -164,6 +167,7 @@
      <select id="selectContentsListByType" resultMap="contentDetailMap" parameterType="map">
        SELECT 
             C.*, 
+            (SELECT COUNT(*) FROM watchlist WHERE watchlist_content = C.contents_id) AS contents_like_count,
             CG.genre_name AS genre_name_alias
         FROM 
             contents C
@@ -181,6 +185,10 @@
     
     <select id="detailGenre" resultType="GenreDto">
     	SELECT * FROM contents_genre WHERE genre_id=#{genreId}
+    </select>
+    
+    <select id="selectContentsLike" resultType="long">
+    	SELECT COUNT(*) FROM watchlist WHERE watchlist_content = #{contentsId}
     </select>
  	
  </mapper>

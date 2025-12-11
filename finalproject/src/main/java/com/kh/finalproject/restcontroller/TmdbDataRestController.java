@@ -93,7 +93,10 @@ public class TmdbDataRestController {
 	    //컨텐츠 상세
 	    @GetMapping("/contents/detail/{contentsId}")
 	    public ContentsDetailDto getContentDetail(@PathVariable Long contentsId) {
-	        return tmdbApiService.getContentDetailWithGenres(contentsId);
+	        ContentsDetailDto contentsDetailDto =  tmdbApiService.getContentDetailWithGenres(contentsId);
+	        Long contentsLike = contentsDao.selectContentsLike(contentsId);
+	        contentsDetailDto.setContentsLike(contentsLike);
+	        return contentsDetailDto;
 	    }
 	    
 	    

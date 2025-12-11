@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.kh.finalproject.dto.WatchlistDto;
+import com.kh.finalproject.vo.WatchlistChangeTypeVO;
 import com.kh.finalproject.vo.WatchlistCheckVO;
 
 @Repository
@@ -33,6 +34,17 @@ public class WatchlistDao {
 		return WatchlistCheckVO.builder()
 						.hasWatchlist(count>0)
 					.build();
+	}
+
+//	//수정(타입 변환용)
+	public WatchlistChangeTypeVO updateType(WatchlistDto watchlistDto) {
+		WatchlistChangeTypeVO changeVO = new WatchlistChangeTypeVO();
+		changeVO.setWatchlistMember(watchlistDto.getWatchlistMember());
+		changeVO.setWatchlistContent(watchlistDto.getWatchlistContent());
+		changeVO.setWatchlistType(watchlistDto.getWatchlistType());
+		boolean result = sqlSession.update("watchlist.update",changeVO)>0;
+		changeVO.setChangeResult(result);
+		return changeVO;
 	}
 	
 }

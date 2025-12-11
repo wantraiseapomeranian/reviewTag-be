@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -39,5 +38,6 @@ public class ReviewDto {
 	private LocalDateTime reviewWtime; //리뷰 작성시간
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime reviewEtime; //리뷰 수정시간
+	@NotNull
 	private Integer reviewPrice; //영화 가치
 }

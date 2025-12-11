@@ -33,5 +33,6 @@ public class MemberReviewListVO {
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime reviewWtime; //리뷰 작성시간
 	private String contentsPosterPath;
+	private Integer reviewPrice; //영화 가치
 	
 }
