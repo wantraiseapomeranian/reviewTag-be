@@ -12,8 +12,6 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
     private TokenRenewalInterceptor tokenRenewalInterceptor;
     @Autowired
     private MemberInterceptor memberInterceptor;
-    @Autowired
-    private AdminInterceptor adminInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -24,7 +22,8 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
                 "/member/logout",      // 로그아웃
                 "/point/**",
                 "/content/**",
-                "/quiz/**"
+                "/quiz/**",
+                "/admin/**"
 //                "/review/**"
                 // contents 북마크 기능만 추가 나머지 컨텐츠 관련 부분 로그인 없이 허용                
                 // 포인트 관련 전체 (/point/history 등)
@@ -45,9 +44,5 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
                 "/point/store/",       // 상품 목록도 제외
                 "/member/refresh"
             ).order(2);
-        
-        //3. 관리자 인터셉터
-      		registry.addInterceptor(adminInterceptor)
-      		.addPathPatterns("/admin/**").order(3);
     }
 }

@@ -64,8 +64,8 @@ public class QuizReportDao {
 	}
 	
 	//신고된 퀴즈 목록 조회
-	public List<QuizReportStatsVO> selectReportedQuizList() {
-        return sqlSession.selectList("quizReport.selectQuizReportList");
+	public List<QuizReportStatsVO> selectReportedQuizList(String status) {
+		return sqlSession.selectList("quizReport.selectQuizReportList", status);
     }
 	
 	//특정 퀴즈의 기타 신고 상세 내역 조회
