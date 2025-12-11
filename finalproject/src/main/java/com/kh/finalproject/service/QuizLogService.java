@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kh.finalproject.dao.QuizDao;
 import com.kh.finalproject.dao.QuizLogDao;
 import com.kh.finalproject.dto.QuizLogDto;
 import com.kh.finalproject.error.NeedPermissionException;
@@ -18,6 +19,9 @@ public class QuizLogService {
 
 	@Autowired
 	private QuizLogDao quizLogDao;
+	
+	@Autowired
+	private QuizDao quizDao;
 	
 	
 	@Transactional
@@ -36,6 +40,9 @@ public class QuizLogService {
 			
 			//퀴즈 기록을 개별로 저장
 			quizLogDao.insert(log);
+			
+			//퀴즈 이용자수 증가
+			quizDao.increaseSolveCount(log.getQuizLogQuizId());
 			
 			//정답 개수 카운트
 			if("Y".equals(log.getQuizLogIsCorrect())) {

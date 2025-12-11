@@ -38,6 +38,9 @@ public class QuizDto {
 	@Builder.Default
 	private String quizStatus = "ACTIVE";
 	
+	//퀴즈를 푼 사람 수
+	private int solveCount;
+	
 	//시간 관련
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime quizCreatedAt;

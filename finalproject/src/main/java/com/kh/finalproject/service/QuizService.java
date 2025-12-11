@@ -110,4 +110,9 @@ public class QuizService {
         return quizDao.increaseQuizReportCount(quizId);
     }
     
+    //내가 등록한 퀴즈 목록 조회
+    public List<QuizDto> selectMyQuizList(String loginId) {
+        return quizDao.selectMyQuizList(loginId);
+    }
+    
 }

@@ -44,6 +44,11 @@ public class QuizDao {
 		return sqlSession.selectList("quiz.selectByContent", quizContentsId);
 	}
 	
+	//내가 등록한 퀴즈 목록 조회
+	public List<QuizDto> selectMyQuizList(String loginId) {
+	    return sqlSession.selectList("quiz.listByMyQuiz", loginId);
+	}
+	
 	//퀴즈 수정
 	public boolean update(QuizDto quizDto) {
 		return sqlSession.update("quiz.update", quizDto) > 0;
@@ -64,6 +69,11 @@ public class QuizDao {
 	//신고 삭제시 카운트 1 감소 메소드
 	public boolean decreaseReportCount(long quizId) {
 	    return sqlSession.update("quiz.decreaseReportCount", quizId) > 0;
+	}
+	
+	//퀴즈 이용자수 증가 메소드
+	public long increaseSolveCount(long quizId) {
+		return sqlSession.update("quiz.increaseSolveCount", quizId);
 	}
 }
 

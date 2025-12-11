@@ -47,6 +47,19 @@
 		]]>
 	</select>
 	
+	<!-- 내가 등록한 퀴즈 목록 조회 -->
+	<select id="listByMyQuiz" resultType="QuizDto">
+		select 
+			quiz_id, 
+        	quiz_contents_id, 
+        	quiz_question, 
+        	quiz_answer,
+        	quiz_solve_count
+		 from quiz
+		where quiz_creator_id = #{quizCreatorId}
+		order by quiz_id desc;
+	</select>
+	
 	<!-- 퀴즈 수정을 위한 조회 구문 -->
 	<select id="detail" resultType="QuizDto">
 		select * from quiz where quiz_id = #{quizId}
@@ -114,5 +127,12 @@
     	set quiz_report_count = quiz_report_count - 1
     	where quiz_id = #{quizId}
       		and quiz_report_count > 0 -- 음수 방지
+	</update>
+	
+	<!-- 마이페이지에서 내 퀴즈를 푼 사람 수 수정 -->
+	<update id="increaseSolveCount" parameterType="long">
+		update quiz
+		set quiz_solve_count = quiz_solve_count + 1
+		where quiz_id = #{quizId}
 	</update>
 </mapper>
