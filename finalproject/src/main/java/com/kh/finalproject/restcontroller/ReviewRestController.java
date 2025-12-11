@@ -41,6 +41,14 @@ public class ReviewRestController {
 		return reviewDao.selectByContents(reviewContents);
 	}
 
+	
+	//로그인 리뷰 조회
+	@GetMapping("/user/{reviewContents}/{reviewWriter}")
+	public ReviewDto selectByUserAndContents(@PathVariable String reviewWriter,
+											@PathVariable Long reviewContents) {
+		ReviewDto reviewDto = reviewDao.selectByUserAndContents(reviewWriter, reviewContents);
+		return reviewDto;
+	}
 	// 단일 리뷰 조회
 	@GetMapping("/{reviewContents}/{reviewNo}")
 	public ReviewDto selectOne(
@@ -49,12 +57,6 @@ public class ReviewRestController {
 		return reviewDao.selectOne(reviewContents,reviewNo);
 	}
 
-	// 로그인 리뷰 조회
-	@GetMapping("/user/{reviewContents}/{loginId}")
-	public ReviewDto selectByUserAndContents(@PathVariable String loginId, @PathVariable Long reviewContents) {
-		ReviewDto reviewDto = reviewDao.selectByUserAndContents(loginId, reviewContents);
-		return reviewDto;
-	}
 
 //	//영화 제목으로 조회
 //	@GetMapping("/{contentsTitle}")

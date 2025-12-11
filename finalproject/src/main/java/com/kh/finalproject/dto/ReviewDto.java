@@ -38,5 +38,6 @@ public class ReviewDto {
 	private LocalDateTime reviewWtime; //리뷰 작성시간
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	private LocalDateTime reviewEtime; //리뷰 수정시간
+	@NotNull
 	private Integer reviewPrice; //영화 가치
 }
