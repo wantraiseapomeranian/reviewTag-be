@@ -27,6 +27,7 @@ import com.kh.finalproject.error.UnauthorizationException;
 import com.kh.finalproject.service.TokenService;
 import com.kh.finalproject.vo.MemberLoginResponseVO;
 import com.kh.finalproject.vo.MemberQuizListVO;
+import com.kh.finalproject.vo.MemberQuizRateVO;
 import com.kh.finalproject.vo.MemberRefreshVO;
 import com.kh.finalproject.vo.MemberReviewListVO;
 import com.kh.finalproject.vo.MemberWatchListVO;
@@ -194,6 +195,11 @@ public class MemberRestController {
 	@GetMapping("/myanswerquiz/{loginId}")
 	public List<MemberQuizListVO> selectAnwserQuizList(@PathVariable String loginId){
 		return memberQuizDao.selectAnswerList(loginId);
+	}
+	// 내가 푼 퀴즈 정답률
+	@GetMapping("/myanswerRate/{loginId}")
+	public List<MemberQuizRateVO> selectAnswerQuizRate(@PathVariable String loginId){
+		return memberQuizDao.selectAnswerQuizRate(loginId);
 	}
 
 

@@ -12,16 +12,15 @@ import lombok.NoArgsConstructor;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data @AllArgsConstructor @NoArgsConstructor @Builder
-public class MemberQuizListVO {
-	
+public class MemberQuizRateVO {
+
 	private String quizLogMemberId;
-	private int quizLogQuizId;
-	private String quizLogIsCorrect;
-	private String quizQuestion;
-	private int quizSolveCount;
 	private int quizContentsId;
 	private String contentsTitle;
-
-
-
+	private int correctCount;
+	private int wrongCount;
+	
+	private double correctRate() {
+		return correctCount / (correctCount+wrongCount);
+	}
 }
