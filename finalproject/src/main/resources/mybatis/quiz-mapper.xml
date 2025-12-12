@@ -62,7 +62,7 @@
         	quiz_solve_count
 		 from quiz
 		where quiz_creator_id = #{loginId}
-		order by quiz_id desc
+		order by quiz_solve_count desc
 	</select>
 	
 	<!-- 퀴즈 수정을 위한 조회 구문 -->

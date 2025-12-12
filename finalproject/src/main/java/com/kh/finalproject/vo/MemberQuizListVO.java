@@ -19,5 +19,7 @@ public class MemberQuizListVO {
 	private String quizLogIsCorrect;
 	private String quizQuestion;
 	private int quizSolveCount;
+	private int quizContentsId;
+	private String contentsTitle;
 
 }
