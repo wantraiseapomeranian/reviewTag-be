@@ -17,13 +17,13 @@ public class AdminService {
 	private QuizReportDao quizReportDao;
 	
 	//신고된 퀴즈 목록 조회
-	public List<QuizReportStatsVO> getReportedQuizList(String loginLevel){
+	public List<QuizReportStatsVO> getReportedQuizList(String loginLevel, String status){
 		
 		//관리자인지 검사
 		if(loginLevel == null || !"관리자".equals(loginLevel))
 			throw new NeedPermissionException();
 		
-		return quizReportDao.selectReportedQuizList();
+		return quizReportDao.selectReportedQuizList(status);
 	}
 	
 	//신고 상세 내역 조회(신고 종류가 기타일때만)

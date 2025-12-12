@@ -34,12 +34,13 @@ public class AdminRestController {
 	//퀴즈 신고 관리 페이지
 	@GetMapping("/quizzes/reports")
 	public List<QuizReportStatsVO> getReportList(
+			@RequestParam String status,
 			@RequestAttribute TokenVO tokenVO
 			) {
 		
 		String loginLevel = tokenVO.getLoginLevel();
 		
-		return adminService.getReportedQuizList(loginLevel);
+		return adminService.getReportedQuizList(loginLevel, status);
 	}
 	//퀴즈 신고 상세 내역 페이지
 	@GetMapping("/quizzes/{quizId}/reports")
@@ -66,10 +67,10 @@ public class AdminRestController {
     }
 	
 	//퀴즈 상태 변경
-	@PatchMapping("/quizzes/{quizId}/status")
+	@PatchMapping("/quizzes/{quizId}/status/{status}")
 	public boolean changeStatus(
 			@PathVariable long quizId,
-			@RequestParam String status,
+			@PathVariable String status,
 			@RequestAttribute TokenVO tokenVO
 			) {
 		

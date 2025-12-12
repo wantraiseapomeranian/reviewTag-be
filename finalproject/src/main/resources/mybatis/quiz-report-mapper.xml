@@ -71,6 +71,15 @@
 	<!-- 신고된 퀴즈 목록 조회 -->
 	<select id="selectQuizReportList" resultType="QuizReportStatsVO">
         select * from view_quiz_report_stats
+        <where>
+            <if test="status == 'active'">
+                and quiz_status in ('ACTIVE', 'BLIND')
+            </if>
+            
+            <if test="status == 'deleted'">
+                and quiz_status = 'DELETED'
+            </if>
+        </where>
         order by last_reported_at desc
     </select>
 	
