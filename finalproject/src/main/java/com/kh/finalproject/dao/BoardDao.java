@@ -33,6 +33,10 @@ public class BoardDao {
 	public List<BoardDto> selesctListByContents(Long boardContentsId){
 		return sqlSession.selectList("board.selectListByContents", boardContentsId);
 	}
+	// 조회 : 컨텐츠별 5개 항목조회 (contents detail 적용)
+	public List<BoardDto> selesctListBy5Contents(Long boardContentsId){
+		return sqlSession.selectList("board.selectListBy5Contents", boardContentsId);
+	}
 	
 	// 상세조회
 	public BoardDto selectOne(int boardNo) {
@@ -46,7 +50,7 @@ public class BoardDao {
 	
 	// 삭제
 	public void delete(int boardNo) {
-		sqlSession.delete("board.detail", boardNo);
+		sqlSession.delete("board.delete", boardNo);
 	}
 	
 	
