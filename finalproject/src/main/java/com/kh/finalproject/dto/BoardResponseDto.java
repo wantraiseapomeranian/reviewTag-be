@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Data @NoArgsConstructor @Builder @AllArgsConstructor
 public class BoardResponseDto {
-	private Integer boardNo;
+	private int boardNo;
 	private String memberId;
 	private String responseType; //(좋아요 || 싫어요)
 }

@@ -1,6 +1,7 @@
 package com.kh.finalproject.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -24,5 +25,6 @@ public class BoardDto {
 	private int boardUnlike;
 	private int boardReply;
 	private String boardNotice;
-	
+	private List<Integer> attachmentNoList;
+ 
 }

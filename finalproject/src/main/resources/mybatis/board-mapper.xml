@@ -52,7 +52,16 @@
 	<delete id="delete">
 		delete board where board_no = #{boardNo}
 	</delete>
-
+	
+	
+	<!-- 첨부파일 기능 -->
+	<insert id="connect">
+		insert into board_attachment(board_no, attachment_no) 
+		values(#{boardNo}, #{attachmentNo})
+	</insert>
+	<select id="findAttachment" resultType="int">
+		select attachment_no from board_attachment where board_no = #{boardNo}
+	</select>
 
 
 </mapper>

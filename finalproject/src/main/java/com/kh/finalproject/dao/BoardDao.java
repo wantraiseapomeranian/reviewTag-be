@@ -1,6 +1,8 @@
 package com.kh.finalproject.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +17,11 @@ public class BoardDao {
 	private SqlSession sqlSession;
 	
 	// 등록
-	public void insert(BoardDto boardDto) {
+	public int insert(BoardDto boardDto) {
 		int boardNo = sqlSession.selectOne("board.sequence");
 		boardDto.setBoardNo(boardNo);
 		sqlSession.insert("board.insert",boardDto);
+		return boardNo;
 	}
 	
 	// 조회 : 전체 조회
@@ -44,6 +47,19 @@ public class BoardDao {
 	// 삭제
 	public void delete(int boardNo) {
 		sqlSession.delete("board.detail", boardNo);
+	}
+	
+	
+	////////////////////첨부파일
+	public void connect(int boardNo, int attachmentNo) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("boardNo", boardNo);
+		params.put("attachmentNo", attachmentNo);
+		
+		sqlSession.insert("board.connect", params);
+	}
+	public int findAttachment(int boardNo) {
+		return sqlSession.selectOne("board.findAttachment", boardNo);
 	}
 	
 }
