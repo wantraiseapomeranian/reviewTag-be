@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board">
+
+
+	<!-- 등록 -->
+	<select id="sequence" resultType="int">
+		select seq_board.nextval from dual
+	</select>
+	
+	<insert id="insert">
+		insert into board(
+			board_no, board_title, board_writer, board_contents, board_text,
+			board_notice
+		)
+		values(
+			#{boardNo}, #{boardTitle}, #{boardWriter}, #{boardContents},
+		#{boardText}, #{boardText}, #{boardNotice}
+	</insert>
+	
+	<!-- 조회 -->
+	<select id="selectList" resultType="boardDto">
+		select * from board order by board_no desc
+	</select>
+	
+	<select id="selectListByContents" resultType="boardDto">
+		select * from board where board_contents_id= #{boardContentsId}
+		order by board_no desc
+	</select>
+
+	
+	<!-- 상세조회 -->
+	<select id="detail" resultType="boardDto">
+		select * from board where board_no = #{boardNo}
+	</select> 
+
+	<!-- 수정(Put) -->
+	<update id="update">
+		update member
+		set
+			board_title=#{boardTitle},
+			board_contents_id = #{boardContentsId},
+			board_text = #{boardText},
+			board_etime=systimestamp
+		where board_no=#{boardNo}
+	</update>
+	
+	<!-- 삭제 -->
+	<delete id="delete">
+		delete board where board_no = #{boardNo}
+	</delete>
+
+
+
+</mapper>
