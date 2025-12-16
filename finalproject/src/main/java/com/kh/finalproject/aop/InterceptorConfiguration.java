@@ -23,7 +23,8 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
                 "/point/**",
                 "/content/**",
                 "/quiz/**",
-                "/admin/**"
+                "/admin/**",
+                "/heart/**"
 //                "/review/**"
                 // contents 북마크 기능만 추가 나머지 컨텐츠 관련 부분 로그인 없이 허용                
                 // 포인트 관련 전체 (/point/history 등)
