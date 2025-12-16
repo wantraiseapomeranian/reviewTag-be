@@ -73,8 +73,8 @@ public class ReviewRestController {
 			@PathVariable Long reviewContents,
 			@PathVariable Long reviewNo) {
 
-		reviewDto.setReviewNo(reviewNo);
 		reviewDto.setReviewContents(reviewContents);
+		reviewDto.setReviewNo(reviewNo);
 
 		boolean success = reviewDao.updateUnit(reviewDto);
 		if (!success) {

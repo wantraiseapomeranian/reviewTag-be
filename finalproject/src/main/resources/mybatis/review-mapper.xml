@@ -51,6 +51,7 @@
 	<update id="updateUnit"> 
 		update review 
 		<set>
+			review_etime = sysdate,
 			<if test="reviewRating != null">
 				review_rating = #{reviewRating},
 			</if>
