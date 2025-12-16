@@ -268,5 +268,9 @@
     <select id="selectContentsLike" resultType="long">
     	SELECT COUNT(*) FROM watchlist WHERE watchlist_content = #{contentsId}
     </select>
+    
+    <select id="selectTitleById" resultType="string">
+    	SELECT contents_id FROM contents WHERE contents_id = #{contentsId}
+    </select>
  	
  </mapper>

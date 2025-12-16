@@ -48,4 +48,8 @@ public class ContentsDao {
     public List<ContentsDetailDto> selectContentsListByPriceRank() {
     	return sqlSession.selectList("contents.selectContentsListByPriceRank");
     }
+    //컨텐츠 아이디로 제목 조회(board)
+    public String selectTitleById(Long contentsId) {
+    	return sqlSession.selectOne("contents.selectTitleById", contentsId);
+    }
  }

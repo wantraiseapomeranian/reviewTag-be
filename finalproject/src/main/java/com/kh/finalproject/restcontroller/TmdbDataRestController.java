@@ -168,4 +168,10 @@ public class TmdbDataRestController {
 	    public List<ContentsDetailDto> selectPriceRank() {
 	    	return contentsDao.selectContentsListByPriceRank();
 	    }
+	    
+	    //id로 제목 조회(for board)
+	    @GetMapping("/title/{boardContentsId}")
+	    public String selectTitleById(@PathVariable Long boardConentsId) {
+	    	return contentsDao.selectTitleById(boardConentsId);
+	    }
 }
