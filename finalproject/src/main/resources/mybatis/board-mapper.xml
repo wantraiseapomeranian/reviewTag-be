@@ -31,11 +31,19 @@
 		order by board_no desc
 	</select>
 
+	<select id = "selectListBy5Contents" resultType="boardDto">
+		select * from(
+			select * from board where board_contents_id= #{boardContentsId}
+			order by board_no desc
+			) where rownum &lt;=5
+	</select>
+
 	
 	<!-- 상세조회 -->
 	<select id="detail" resultType="boardDto">
 		select * from board where board_no = #{boardNo}
 	</select> 
+
 
 	<!-- 수정(Put) -->
 	<update id="update">
