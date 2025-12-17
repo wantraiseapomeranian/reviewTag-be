@@ -5,6 +5,7 @@
   
 <mapper namespace="pointhistory">
 
+
   <select id="sequence" resultType="int">
       SELECT seq_point_history.nextval FROM dual
   </select>

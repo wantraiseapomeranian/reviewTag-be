@@ -5,6 +5,7 @@
   
 <mapper namespace="pointitemstore">
 
+
     <insert id="insert">
         INSERT INTO POINT_ITEM_STORE(  
             point_item_no, 

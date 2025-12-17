@@ -5,6 +5,7 @@
 
 <mapper namespace="pointWishlist">
 
+
     <insert id="insert">
         INSERT INTO POINT_WISHLIST (
             POINT_WISHLIST_NO, 

@@ -5,6 +5,7 @@
   
 <mapper namespace="inventory">
   
+  
   <select id="sequence" resultType="int">
       SELECT seq_inventory.nextval FROM dual
   </select>

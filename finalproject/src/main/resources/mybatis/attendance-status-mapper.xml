@@ -33,5 +33,7 @@
 		delete attendance_status 
 		where attendance_status_member_id = #{memberId}
 	</delete>
+	
+	
 
 </mapper>

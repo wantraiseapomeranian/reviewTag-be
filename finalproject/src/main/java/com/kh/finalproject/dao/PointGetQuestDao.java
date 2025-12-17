@@ -41,7 +41,6 @@ public class PointGetQuestDao {
         params.put("date", date);
         return sqlSession.update(NAMESPACE + "upsertQuestLog", params);
     }
-
     /**
      * 3. 보상 수령 상태 변경 (N -> Y)
      * @param memberId 유저 ID

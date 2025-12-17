@@ -35,8 +35,7 @@ public class InventoryDao {
         return sqlSession.selectList("inventory.selectListByMemberId", memberId);
     }
 
- 
-    public int selectCountMyItem(String memberId, long itemNo) {
+     public int selectCountMyItem(String memberId, long itemNo) {
         InventoryDto params = new InventoryDto();
         params.setInventoryMemberId(memberId);
         params.setInventoryItemNo(itemNo); 

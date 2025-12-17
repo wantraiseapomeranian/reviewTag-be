@@ -61,7 +61,6 @@ public class IconRestController {
         // Service에 inventoryNo(long) 전달
         return iconService.drawRandomIcon(loginId, vo.getInventoryNo());
     }
-
     // 2. 내 아이콘함 조회
     // 최종 URL: GET /icon/my
     @GetMapping("/my")

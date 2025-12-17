@@ -19,8 +19,6 @@ public class PointItemStoreDto {
     private String pointItemSrc;
     private String pointItemReqLevel;
     private Timestamp pointItemRegDate;
-    
- 
     // 1이면 한정구매, 0이면 무제한이라고 가정
     private int pointItemIsLimitedPurchase; 
 }

@@ -13,11 +13,9 @@ import lombok.NoArgsConstructor;
 public class PointHistoryDto {
     private Long pointHistoryId;         
     private String pointHistoryMemberId; 
-    private int pointHistoryAmount;      
-    
+    private int pointHistoryAmount;        
     // CHECK 제약조건: 'GET','USE','SEND','RECEIVED'
     private String pointHistoryTrxType;  
-    
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private Timestamp pointHistoryCreatedAt; 
 }

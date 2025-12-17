@@ -35,5 +35,6 @@
         WHERE attendance_history_member_id = #{memberId}
         ORDER BY attendance_history_date ASC
     </select>
+    
 
 </mapper>

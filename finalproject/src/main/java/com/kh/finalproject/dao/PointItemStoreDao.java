@@ -36,4 +36,4 @@ public class PointItemStoreDao {
     public boolean delete(long pointItemNo) { 
         return sqlSession.delete("pointitemstore.delete", pointItemNo) > 0;
     }
-}
+    }

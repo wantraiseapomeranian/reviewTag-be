@@ -12,7 +12,6 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "daily-quest")
 public class DailyQuestProperties {
     private List<QuestDetail> list; 
-
     @Data 
     public static class QuestDetail {
         private String type;

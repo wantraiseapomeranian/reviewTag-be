@@ -3,6 +3,7 @@
 
 <mapper namespace="dailyquest">
 
+
     <select id="selectTodayLogs" resultType="map">
         SELECT 
             POINT_GET_QUEST_TYPE      AS "type",

@@ -185,7 +185,6 @@ public class PointStoreRestController {
         
         return ResponseEntity.ok(resultIndex); 
     }
-
     // 13. 내 포인트 및 장착 정보 조회 (GET /point/main/store/my-info)
     @GetMapping("/my-info")
     public MemberPointVO getMyInfo(

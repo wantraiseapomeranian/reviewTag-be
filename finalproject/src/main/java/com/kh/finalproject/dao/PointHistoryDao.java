@@ -41,9 +41,7 @@ public class PointHistoryDao {
         return sqlSession.delete("pointhistory.delete", pointHistoryId) > 0;
     }
     
-   
-
-    /* 5. 전체 개수 조회 (필터 포함) */
+       /* 5. 전체 개수 조회 (필터 포함) */
     public int countHistory(String memberId, String type) {
         Map<String, Object> params = new HashMap<>();
         params.put("memberId", memberId);
