@@ -190,9 +190,9 @@ public class BoardRestController {
 	}
 	
 	// 조회수 증가 로직 구현
-	@PostMapping("/viewCount")
+	@PostMapping("/viewUpdate/{boardNo}")
 	public void increaseViewCount(@RequestAttribute TokenVO tokenVO,
-												@RequestParam int boardNo,
+												@PathVariable int boardNo,
 												HttpSession session) {
 		if(tokenVO == null) return;
 		String loginId = tokenVO.getLoginId();
