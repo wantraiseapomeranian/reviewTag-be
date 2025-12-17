@@ -97,6 +97,7 @@ public class BoardRestController {
 		List<BoardDto> list = boardDao.selectListWithPage(pageVO);
 		return new PageResponseVO<>(list, pageVO);
 	}
+
 		
 	//상세 조회
 	@GetMapping("/{boardNo}")

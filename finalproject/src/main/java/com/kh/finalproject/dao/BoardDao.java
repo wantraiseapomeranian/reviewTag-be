@@ -50,6 +50,35 @@ public class BoardDao {
 		return sqlSession.selectOne("board.countContentsBoard", boardContentsId);
 	}
 	
+	// 조회 : 검색어 조회(제목/작성자)
+	public List<BoardDto> selectForSearchWithPage(String keyword, String column, PageVO pageVO) {
+		Map<String, Object> param = new HashMap<>();
+		param.put("keyword", keyword);
+		param.put("column", column);
+		param.put("pageVO", pageVO);
+		
+		return sqlSession.selectList("board.selectForSearchWithPage", param);
+	}
+	public int countBoardForSearch(String keyword, String column) {
+		Map<String, Object> param = new HashMap<>();
+		param.put("keyword", keyword);
+		param.put("column", column);
+		
+		return sqlSession.selectOne("board.countBoardForSearch", param);
+	}
+	
+	// 조회 : 컨텐츠 제목으로 조회
+	public List<BoardDto> selectByContentsTitle(String contentsTitle, PageVO pageVO) {
+		Map<String, Object> param = new HashMap<>();
+		param.put("pageVO", pageVO);
+		param.put("contentsTitle", contentsTitle);
+		
+		return sqlSession.selectList("board.selectByContentsTitle", param);
+	}
+	public int countByContentsTitle(String contentsTitle) {
+		return sqlSession.selectOne("board.countByContentsTitle", contentsTitle);
+	}
+	
 	// 조회 : 컨텐츠별 5개 항목조회
 	// - contents detail 적용 / 페이지네이션 X
 	public List<BoardDto> selectListBy5Contents(Long boardContentsId){
