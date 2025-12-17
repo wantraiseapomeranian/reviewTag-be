@@ -24,7 +24,7 @@ public class BoardDto {
 	private int boardViewCount;
 	private int boardLike;
 	private int boardUnlike;
-	private int boardReply;
+	private int boardReplyCount;
 	private String boardNotice;
 	private List<Integer> attachmentNoList;
  
