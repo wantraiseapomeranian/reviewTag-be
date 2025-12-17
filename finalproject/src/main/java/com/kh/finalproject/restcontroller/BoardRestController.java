@@ -1,8 +1,12 @@
 package com.kh.finalproject.restcontroller;
 
+
+
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jsoup.Jsoup;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,6 +37,9 @@ import com.kh.finalproject.service.AttachmentService;
 import com.kh.finalproject.vo.BoardResponseVO;
 import com.kh.finalproject.vo.PageResponseVO;
 import com.kh.finalproject.vo.PageVO;
+import com.kh.finalproject.vo.TokenVO;
+
+import jakarta.servlet.http.HttpSession;
 
 
 @CrossOrigin
@@ -238,4 +246,36 @@ public class BoardRestController {
 			.build();
 	}
 	
+	// 조회수 증가 로직 구현
+	@PostMapping("/viewUpdate/{boardNo}")
+	public void increaseViewCount(@RequestAttribute TokenVO tokenVO,
+												@PathVariable int boardNo,
+												HttpSession session) {
+		if(tokenVO == null) return;
+		String loginId = tokenVO.getLoginId();
+		long now = System.currentTimeMillis();
+		long limitTime = 30 * 60 * 1000;
+		
+		 ///세션에서 loginId-boardNo 중복여부 검사
+		 // 세션에서 전체 조회 기록맵 꺼내기
+		 // - Set으로 설정하는 이유는 회원 1명이 여러 게시글번호를 조회할수 있기 때문
+		 Map<String, Map<Integer, Long>> viewHistory = (Map<String, Map<Integer, Long>>) session.getAttribute("viewHistory");
+		 if(viewHistory == null) { // 값이 없으면(null)이면, 새로운 Map 생성
+			 viewHistory = new HashMap<>();
+		 }
+		 // 해당 유저 조회 기록 
+	    Map<Integer, Long> userHistory = viewHistory.computeIfAbsent(loginId, k -> new HashMap<>());
+	    Long lastViewed = userHistory.get(boardNo);
+	    if (lastViewed != null && now-lastViewed <limitTime) {
+	        return;
+	    }
+	    userHistory.put(boardNo, now);
+	    // 30분 지난 기록 정리
+			    userHistory.entrySet().removeIf(
+			        e -> now - e.getValue() > limitTime
+			    );
+	    session.setAttribute("viewHistory", viewHistory);
+		boardDao.increaseViewCount(boardNo);
+	}
+
 }
