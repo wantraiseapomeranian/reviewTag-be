@@ -95,8 +95,18 @@ public class MemberDao {
 			return sqlSession.update("member.upPoint", memberDto) > 0 ;
 		}
 		//(신뢰도 갱신)
-		public boolean updateReliability(MemberDto memberDto) {
-			return sqlSession.update("member.updateReliability", memberDto) > 0 ;
+		public void updateReliability(String memberId, int rel) {
+			Map<String, Object> param = new HashMap<>();
+			param.put("memberId", memberId);
+			param.put("rel", rel);		
+			sqlSession.update("member.updateReliability", param);
+		}
+		//(신뢰도 갱신2)
+		public void deleteReliability(String memberId, int rel) {
+			Map<String, Object> param = new HashMap<>();
+			param.put("memberId", memberId);
+			param.put("rel", rel);
+			sqlSession.update("member.deleteReliability", param);
 		}
 		//(회원등급 수정)
 		public boolean updateMemberLevel(MemberDto memberDto) {

@@ -75,11 +75,14 @@
 		delete review where
 		review_contents = #{reviewContents} and
 		review_no = #{reviewNo}
+		
+<!-- 		update member -->
+<!-- 		set member_reliability = member_reliability - review_realiability -->
+<!-- 		where member_id = review_writer -->
 	</delete>
 	
 
 	<!-- 좋아요 관련 -->
-	
 	<update id="updateReviewLike">
 		update review set review_like = (
 				select count(*) from review_like where review_no = #{reviewNo}

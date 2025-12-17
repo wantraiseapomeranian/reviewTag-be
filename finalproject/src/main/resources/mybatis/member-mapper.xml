@@ -125,10 +125,16 @@
 		where member_id=#{memberId}
 	</update>
 	
-	<update id="updateReliabilty">
+	<update id="updateReliability">
 		update member
-		set member_reliability=#{memberReliability}
+		set member_reliability = member_reliability + #{rel}
 		where member_id=#{memberId}
+	</update>
+	
+	<update id="deleteReliability">
+		update member
+		set member_reliability = member_reliability - #{rel}
+		where member_id = #{memberId}
 	</update>
 	
 	<update id="updateMemberLevel">

@@ -19,21 +19,28 @@ import com.kh.finalproject.dao.ReviewDao;
 import com.kh.finalproject.dao.ReviewLikeDao;
 import com.kh.finalproject.dto.ReviewDto;
 import com.kh.finalproject.error.TargetNotfoundException;
+import com.kh.finalproject.service.ReviewService;
 import com.kh.finalproject.vo.ReviewLikeVO;
 
 @CrossOrigin 
 @RestController
 @RequestMapping("/review")
 public class ReviewRestController {
+
+    private final ReviewService reviewService;
 	@Autowired
 	private ReviewDao reviewDao;
 	@Autowired
 	private ReviewLikeDao reviewLikeDao;
 
+    ReviewRestController(ReviewService reviewService) {
+        this.reviewService = reviewService;
+    }
+
 	// 등록
 	@PostMapping("/")
 	public void insert(@RequestBody ReviewDto reviewDto) {
-		reviewDao.insert(reviewDto);
+		reviewService.addReview(reviewDto);
 	}
 
 	// 전체 리뷰 조회
