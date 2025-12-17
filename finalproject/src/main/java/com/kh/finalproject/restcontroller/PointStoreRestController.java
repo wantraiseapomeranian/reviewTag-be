@@ -237,4 +237,19 @@ public class PointStoreRestController {
             return "fail"; 
         }
     }
+    //장착해제
+    @PostMapping("/inventory/unequip")
+    public String unequipItem(
+            @RequestAttribute(value="loginId", required=false) String loginId,
+            @RequestBody PointUseVO vo) { // inventoryNo를 받기 위해 PointUseVO 사용
+        if(loginId == null) return "fail:로그인 필요";
+        try {
+            // 서비스에서 장착 해제 로직 실행
+            pointService.unequipItem(loginId, vo.getInventoryNo());
+            return "success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail:" + e.getMessage();
+        }
+    }
 }

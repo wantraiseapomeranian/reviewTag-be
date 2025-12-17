@@ -186,7 +186,34 @@
     WHERE member_id = #{memberId}
 </update>
 	
-	
+<select id="countTotalRanking" resultType="int">
+        SELECT COUNT(*) 
+        FROM member
+        WHERE member_level != '관리자'
+        <if test="keyword != null and keyword != ''">
+            AND member_nickname LIKE '%' || #{keyword} || '%'
+        </if>
+    </select>
+
+    <select id="totalPointRanking" resultType="PointRankingVO">
+        SELECT * FROM (
+            SELECT TMP.*, ROWNUM AS rn FROM (
+                SELECT 
+                    member_id AS "memberId", 
+                    member_nickname AS "nickname", 
+                    member_point AS "point", 
+                    member_level AS "level",
+                    RANK() OVER (ORDER BY member_point DESC) AS "ranking"
+                FROM member
+                WHERE member_level != '관리자'
+                <if test="keyword != null and keyword != ''">
+                    AND member_nickname LIKE '%' || #{keyword} || '%'
+                </if>
+                ORDER BY "ranking" ASC
+            ) TMP
+        )
+        WHERE rn BETWEEN #{start} AND #{end}
+    </select>
 
 
 </mapper>

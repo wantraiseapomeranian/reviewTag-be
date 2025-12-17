@@ -66,13 +66,52 @@
     </update>
     
 <select id="selectEquippedIconSrc" parameterType="string" resultType="string">
-    SELECT I.ICON_SRC
-    FROM MEMBER_ICONS MI
+    SELECT I.ICON_SRC FROM MEMBER_ICONS MI
     JOIN ICON I ON MI.MEMBER_ICONS_ICON_ID = I.ICON_ID
-    WHERE MI.MEMBER_ICONS_MEMBER_ID = #{memberId}
-      AND MI.IS_EQUIPPED = 'Y'  -- ★ 여기서 'Y'인걸 못 찾고 있을 수 있음
-      AND ROWNUM &lt;= 1   
+    WHERE MI.MEMBER_ICONS_MEMBER_ID = #{memberId} AND MI.IS_EQUIPPED = 'Y' AND ROWNUM &lt;= 1   
 </select>
 
+<select id="selectEquippedFrameStyle" resultType="string">
+    SELECT B.point_item_content
+    FROM inventory A
+    JOIN point_item_store B ON A.inventory_item_no = B.point_item_no
+    WHERE A.inventory_member_id = #{memberId}
+      AND A.inventory_equipped = 'Y'
+      AND B.point_item_type = 'DECO_FRAME'
+</select>
+
+<select id="selectEquippedBgStyle" resultType="string">
+    SELECT B.point_item_content
+    FROM inventory A
+    JOIN point_item_store B ON A.inventory_item_no = B.point_item_no
+    WHERE A.inventory_member_id = #{memberId}
+      AND A.inventory_equipped = 'Y'
+      AND B.point_item_type = 'DECO_BG'
+</select>
+
+<select id="selectEquippedNickStyle" resultType="string">
+    SELECT B.point_item_content
+    FROM inventory A
+    JOIN point_item_store B ON A.inventory_item_no = B.point_item_no
+    WHERE A.inventory_member_id = #{memberId}
+      AND A.inventory_equipped = 'Y'
+      AND B.point_item_type = 'DECO_NICK'
+</select>
+<update id="unequipAllItemsByType">
+    UPDATE INVENTORY SET INVENTORY_EQUIPPED = 'N'
+    WHERE INVENTORY_MEMBER_ID = #{memberId}
+    AND INVENTORY_ITEM_NO IN (
+        SELECT POINT_ITEM_NO 
+        FROM POINT_ITEM 
+        WHERE POINT_ITEM_TYPE = #{itemType}
+    )
+</update>
+
+
+<update id="equipItem">
+    UPDATE INVENTORY 
+    SET INVENTORY_EQUIPPED = 'Y'
+    WHERE INVENTORY_NO = #{inventoryNo}
+</update>
 
 </mapper>

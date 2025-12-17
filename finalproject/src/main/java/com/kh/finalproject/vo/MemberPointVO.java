@@ -19,4 +19,6 @@ public class MemberPointVO {
     // 치장 관련 정보 (없으면 null 또는 빈 문자열)
     private String nickStyle;   // 닉네임 꾸미기 클래스명 (예: "nick-rainbow")
     private String iconSrc;     // 장착한 아이콘 이미지 경로 (예: "cat.png")
+    private String bgSrc;       // 배경 이미지 경로 (DECO_BG)
+    private String frameSrc;    // 테두리 이미지 경로 (DECO_FRAME)
 }

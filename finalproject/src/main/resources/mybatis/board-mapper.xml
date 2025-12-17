@@ -40,6 +40,55 @@
 	    select count(*) from board
 	</select>
 	
+	<!-- 제목 or 작성자로 검색 -->
+	<select id="selectForSearchWithPage" resultType="boardDto">
+		select * from (
+		select rownum rn, TMP.* from(
+			select * from board where instr(#{column}, #{keyword}) > 0
+			order by
+			(case when board_notice = 'Y' then 0 else 1 end) asc, 
+			board_no desc
+		) TMP
+		) where rn between #{begin} and #{end}
+	</select>
+	<select id="countBoardForSearch" resultType="int">
+	    select count(*) from board  where instr(#{column}, #{keyword}) > 0
+	</select>
+	
+	<!-- 컨텐츠 제목으로 검색 -->
+	<select id="selectByContentsTitle">
+		select * from (
+        select rownum rn, TMP.* from (
+            select * from board 
+            <where>
+                <if test="contentsTitle != null and contentsTitle != ''">
+                    AND board_contents_id IN (
+                        SELECT contents_id 
+                        FROM contents 
+                        WHERE contents_title LIKE '%' || #{contentsTitle} || '%'
+                    )
+                </if>
+            </where>
+            order by
+            (case when board_notice = 'Y' then 0 else 1 end) asc, 
+            board_no desc
+        ) TMP
+    ) where rn between #{begin} and #{end}
+	</select>
+	<select id="countByContentsTitle">
+		 select count(*) from board 
+            <where>
+                <if test="contentsTitle != null and contentsTitle != ''">
+                    AND board_contents_id IN (
+                        SELECT contents_id 
+                        FROM contents 
+                        WHERE contents_title LIKE '%' || #{contentsTitle} || '%'
+                    )
+                </if>
+            </where>
+	</select>
+
+	
 	
 	<!-- 컨텐츠별 조회 -->
 	<select id="selectListByContents" resultType="boardDto">

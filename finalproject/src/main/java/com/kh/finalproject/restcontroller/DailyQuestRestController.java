@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.kh.finalproject.service.DailyQuestService;
 import com.kh.finalproject.vo.DailyQuestVO;
+import com.kh.finalproject.vo.DailyQuizVO;
 
 @RestController
 @RequestMapping("/point/quest")
@@ -16,14 +17,31 @@ public class DailyQuestRestController {
 
     @Autowired private DailyQuestService dailyQuestService;
 
-    // 1. 퀘스트 목록 조회
+    // 1. 퀘스트 목록 조회 (기존 유지)
     @GetMapping("/list")
     public List<DailyQuestVO> list(@RequestAttribute(value="loginId", required=false) String loginId) {
         if(loginId == null) return List.of();
         return dailyQuestService.getQuestList(loginId);
     }
 
-    // 2. 보상 받기
+    // 2. [추가] 랜덤 퀴즈 문제 요청
+    @GetMapping("/quiz/random")
+    public DailyQuizVO getRandomQuiz() {
+        return dailyQuestService.getRandomQuiz();
+    }
+
+    // 3. [추가] 퀴즈 정답 확인 및 진행도 업데이트
+    @PostMapping("/quiz/check")
+    public String checkQuiz(@RequestAttribute("loginId") String loginId, @RequestBody Map<String, String> body) {
+        String answer = body.get("answer");
+        String correctAnswer = body.get("correctAnswer");
+        
+        // 서비스에서 정답 확인 후 맞으면 DB에 count를 올림
+        boolean isCorrect = dailyQuestService.checkQuizAndProgress(loginId, answer, correctAnswer);
+        return isCorrect ? "success" : "fail";
+    }
+
+    // 4. 보상 받기 (기존 유지)
     @PostMapping("/claim")
     public String claim(@RequestAttribute("loginId") String loginId, @RequestBody Map<String, String> body) {
         try {
@@ -33,13 +51,5 @@ public class DailyQuestRestController {
         } catch (Exception e) {
             return "fail:" + e.getMessage();
         }
-    }
-    
-    // 3. (테스트용) 퀴즈 정답 시 진행도 강제 증가
-    // 실제로는 각 기능(리뷰작성, 룰렛 등)이 수행될 때 Service에서 questProgress를 호출해야 함
-    @PostMapping("/progress")
-    public String progress(@RequestAttribute("loginId") String loginId, @RequestBody Map<String, String> body) {
-        dailyQuestService.questProgress(loginId, body.get("type"));
-        return "success";
     }
 }

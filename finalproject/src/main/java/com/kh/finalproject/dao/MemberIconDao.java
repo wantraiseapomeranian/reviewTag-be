@@ -56,4 +56,33 @@ public class MemberIconDao {
         param.put("memberId", memberId);
         return sqlSession.selectOne("memberIcon.selectEquippedIconSrc", param);
     }
+ // 7. 현재 장착 중인 '테두리' 식별값(클래스명) 조회
+    public String selectEquippedFrameStyle(String memberId) {
+        return sqlSession.selectOne("memberIcon.selectEquippedFrameStyle", memberId);
+    }
+
+    // 8. 현재 장착 중인 '배경' 식별값(클래스명) 조회
+    public String selectEquippedBgStyle(String memberId) {
+        return sqlSession.selectOne("memberIcon.selectEquippedBgStyle", memberId);
+    }
+
+    // 기존 닉네임 스타일 조회 (참고용)
+    public String selectEquippedNickStyle(String memberId) {
+        return sqlSession.selectOne("memberIcon.selectEquippedNickStyle", memberId);
+    }
+    
+ // 10. 특정 타입(테두리/배경/닉네임)의 모든 아이템 장착 해제
+    public void unequipAllItemsByType(String memberId, String itemType) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("memberId", memberId);
+        params.put("itemType", itemType); // 'deco_frame', 'deco_bg' 등
+        sqlSession.update("memberIcon.unequipAllItemsByType", params);
+    }
+
+    // 11. 특정 인벤토리 아이템 장착
+    public void equipItem(int inventoryNo) {
+        // 인벤토리 번호(PK)만 알면 바로 장착 가능
+        sqlSession.update("memberIcon.equipItem", inventoryNo);
+    }
+    
 }

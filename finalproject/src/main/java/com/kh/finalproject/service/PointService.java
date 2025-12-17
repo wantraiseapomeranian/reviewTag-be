@@ -30,7 +30,8 @@ public class PointService {
     @Autowired private PointWishlistDao pointWishlistDao;
     @Autowired private MemberIconDao memberIconDao;
     @Autowired private DailyQuestService dailyQuestService;
-    // 등급 점수 변환
+
+    // [1] 유틸리티: 등급 가중치
     private int getLevelWeight(String level) {
         if (level == null) return 0;
         switch (level) {
@@ -41,207 +42,107 @@ public class PointService {
         }
     }
 
-    // [통합 결제 로직]
+    // [2] 포인트 증감 공통 메서드 (핵심)
+    @Transactional
+    public boolean addPoint(String memberId, int amount, String trxType) {
+        MemberDto dto = new MemberDto();
+        dto.setMemberId(memberId);
+        dto.setMemberPoint(amount); 
+        if (memberDao.upPoint(dto)) {
+            pointHistoryDao.insert(PointHistoryDto.builder()
+                .pointHistoryMemberId(memberId)
+                .pointHistoryAmount(amount)
+                .pointHistoryTrxType(trxType)
+                .build());
+            return true;
+        }
+        return false;
+    }
+
+    // ★ 복구: 출석 체크 및 외부 포인트 지급 로직
+    @Transactional
+    public void addAttendancePoint(String loginId, int amount, String memo) {
+        // memo는 히스토리 trxType으로 활용하거나 로그용으로 사용
+        addPoint(loginId, amount, "GET"); 
+    }
+
+    // [3] 상점 트랜잭션 (구매/선물)
     private void processTransaction(String senderId, String receiverId, long itemNo, String trxType) {
-
         PointItemStoreDto item = pointItemDao.selectOneNumber(itemNo);
-        if (item == null) throw new RuntimeException("상품 없음");
-        if (item.getPointItemStock() <= 0) throw new RuntimeException("품절");
+        if (item == null || item.getPointItemStock() <= 0) throw new RuntimeException("상품 오류/품절");
 
-        // 1회 한정 아이템
         if (item.getPointItemIsLimitedPurchase() == 1) {
-            boolean alreadyHas = inventoryDao
-                .selectListByMemberId(receiverId)
-                .stream()
+            boolean alreadyHas = inventoryDao.selectListByMemberId(receiverId).stream()
                 .anyMatch(i -> i.getInventoryItemNo() == itemNo);
-
-            if (alreadyHas)
-                throw new RuntimeException("이미 보유한 아이템입니다.");
+            if (alreadyHas) throw new RuntimeException("이미 보유 중");
         }
 
-        // 등급 체크
-        MemberDto sender = memberDao.selectOne(senderId);
-        int userScore = getLevelWeight(sender.getMemberLevel());
-        int reqScore = getLevelWeight(item.getPointItemReqLevel());
-
-        if (!"관리자".equals(sender.getMemberLevel()) && userScore < reqScore)
-            throw new RuntimeException("등급 부족");
-
-        // 포인트 차감
         addPoint(senderId, -(int)item.getPointItemPrice(), trxType);
-
-        // 재고 차감
         item.setPointItemStock(item.getPointItemStock() - 1);
         pointItemDao.update(item);
 
-        // 인벤토리 지급
-        InventoryDto inven = inventoryDao
-            .selectListByMemberId(receiverId)
-            .stream()
-            .filter(i -> i.getInventoryItemNo() == itemNo)
-            .findFirst()
-            .orElse(null);
+        InventoryDto inven = inventoryDao.selectListByMemberId(receiverId).stream()
+            .filter(i -> i.getInventoryItemNo() == itemNo).findFirst().orElse(null);
 
         if (inven != null) {
             inven.setInventoryQuantity(inven.getInventoryQuantity() + 1);
             inventoryDao.update(inven);
         } else {
-            insertNewInventory(receiverId, itemNo);
+            InventoryDto newInven = new InventoryDto();
+            newInven.setInventoryMemberId(receiverId);
+            newInven.setInventoryItemNo(itemNo); 
+            newInven.setInventoryQuantity(1);
+            newInven.setInventoryEquipped("N");
+            inventoryDao.insert(newInven);
         }
     }
 
-    // 인벤토리 신규 등록 헬퍼
-    private void insertNewInventory(String memberId, long itemNo) {
-        InventoryDto inven = new InventoryDto();
-        inven.setInventoryMemberId(memberId);
-        inven.setInventoryItemNo(itemNo); 
-        inven.setInventoryQuantity(1);
-        inven.setInventoryEquipped("N");
-        inventoryDao.insert(inven);
-    }
+    @Transactional public void purchaseItem(String id, long no) { processTransaction(id, id, no, "USE"); }
+    @Transactional public void giftItem(String sid, String tid, long no) { processTransaction(sid, tid, no, "SEND"); }
 
-    // [구매]
-    @Transactional
-    public void purchaseItem(String loginId, long itemNo) {
-        // ★ [수정] "BUY" -> "USE" (DB 제약조건 준수)
-        processTransaction(loginId, loginId, itemNo, "USE");
-    }
-
-    // [선물]
-    @Transactional
-    public void giftItem(String senderId, String targetId, long itemNo) {
-        if (senderId.equals(targetId)) throw new RuntimeException("본인 선물 불가");
-        if (memberDao.selectOne(targetId) == null) throw new RuntimeException("회원 없음");
-
-        processTransaction(senderId, targetId, itemNo, "SEND");
-    }
-
-    // [취소/환불]
-    @Transactional
-    public void cancelItem(String loginId, long inventoryNo) {
-        InventoryDto inven = inventoryDao.selectOne(inventoryNo);
-
-        if (inven == null) throw new RuntimeException("아이템 없음");
-        if (!loginId.equals(inven.getInventoryMemberId())) throw new RuntimeException("권한 없음");
-        if ("Y".equals(inven.getInventoryEquipped()))
-            throw new RuntimeException("사용 중인 아이템은 환불 불가");
-
-        PointItemStoreDto item = pointItemDao.selectOneNumber(inven.getInventoryItemNo());
-
-        // ★ [수정] "REFUND" -> "GET" (DB 제약조건 준수: 환불받는 건 '획득'으로 처리)
-        addPoint(loginId, (int)item.getPointItemPrice(), "GET");
-
-        // 재고 복구
-        item.setPointItemStock(item.getPointItemStock() + 1);
-        pointItemDao.update(item);
-
-        decreaseInventoryOrDelete(inven);
-    }
-    
-    // [관리자] 상품 등록/수정/삭제
-    @Transactional
-    public void addItem(String loginId, PointItemStoreDto itemDto) {
-        MemberDto member = memberDao.selectOne(loginId);
-        if (member == null || !member.getMemberLevel().equals("관리자")) throw new RuntimeException("관리자 권한 없음");
-        pointItemDao.insert(itemDto);
-    }
-
-    @Transactional
-    public void editItem(String loginId, PointItemStoreDto itemDto) {
-        MemberDto member = memberDao.selectOne(loginId);
-        if (member == null || !member.getMemberLevel().equals("관리자")) throw new RuntimeException("권한 없음");
-        pointItemDao.update(itemDto); 
-    }
-
-    @Transactional
-    public void deleteItem(String loginId, long itemNo) {
-        MemberDto member = memberDao.selectOne(loginId);
-        if (member == null || !member.getMemberLevel().equals("관리자")) throw new RuntimeException("권한 없음");
-        pointItemDao.delete(itemNo);
-    }
-
-    // 인벤토리 아이템 폐기
-    @Transactional
-    public void discardItem(String loginId, long inventoryNo) {
-        InventoryDto inven = inventoryDao.selectOne(inventoryNo);
-        if (inven == null) throw new RuntimeException("아이템 없음");
-        if (!inven.getInventoryMemberId().equals(loginId)) throw new RuntimeException("권한 없음");
-
-        inventoryDao.delete(inventoryNo);
-    }
-
-    // [아이템 사용]
+    // [4] 인벤토리 관리 (사용/해제/환불)
     @Transactional
     public void useItem(String loginId, long inventoryNo, String extraValue) {
-
         InventoryDto inven = inventoryDao.selectOne(inventoryNo);
-        if (inven == null || !loginId.equals(inven.getInventoryMemberId())) {
-            throw new RuntimeException("아이템 정보 없음 / 권한 없음");
-        }
-
         PointItemStoreDto item = pointItemDao.selectOneNumber(inven.getInventoryItemNo());
-        if (item == null) {
-            throw new RuntimeException("존재하지 않는 아이템입니다.");
-        }
-
         String type = item.getPointItemType();
 
         switch (type) {
             case "CHANGE_NICK":
-                if (extraValue == null || extraValue.isBlank())
-                    throw new RuntimeException("변경할 닉네임을 입력하세요.");
-
-                if (memberDao.selectOneByMemberNickname(extraValue) != null)
-                    throw new RuntimeException("이미 사용 중인 닉네임입니다.");
-
                 MemberDto dto = new MemberDto();
                 dto.setMemberId(loginId);
                 dto.setMemberNickname(extraValue);
-
-                if (!memberDao.updateNickname(dto))
-                    throw new RuntimeException("닉네임 변경 실패");
-
+                memberDao.updateNickname(dto);
                 decreaseInventoryOrDelete(inven);
                 break;
-
             case "VOUCHER":
-                addPoint(loginId, (int) item.getPointItemPrice(), "GET");
-                decreaseInventoryOrDelete(inven);
-                break;
-
             case "RANDOM_POINT":
-                int min = 100, max = 2000;
-                int random = (int)(Math.random() * (max - min + 1)) + min;
-
-                addPoint(loginId, random, "GET");
+                int amount = type.equals("VOUCHER") ? (int)item.getPointItemPrice() : (int)(Math.random()*1901)+100;
+                addPoint(loginId, amount, "GET");
                 decreaseInventoryOrDelete(inven);
                 break;
-
-            case "RANDOM_ICON":
-            case "RANDOM_ROULETTE":
-                throw new RuntimeException("해당 아이템은 전용 API를 이용하세요.");
-
             case "DECO_NICK":
             case "DECO_BG":
             case "DECO_ICON":
-
-                if ("Y".equals(inven.getInventoryEquipped())) {
-                    throw new RuntimeException("이미 착용 중인 아이템입니다.");
-                }
-                unequipByType(loginId, type);
-
+            case "DECO_FRAME":
+                this.unequipByType(loginId, type);
                 inven.setInventoryEquipped("Y");
                 inventoryDao.update(inven);
                 break;
+        }
+    }
 
-            default:
-                throw new RuntimeException("사용할 수 없는 아이템 타입입니다.");
+    @Transactional
+    public void unequipItem(String loginId, long inventoryNo) {
+        InventoryDto inven = inventoryDao.selectOne(inventoryNo);
+        if (inven != null && loginId.equals(inven.getInventoryMemberId())) {
+            inven.setInventoryEquipped("N");
+            inventoryDao.update(inven);
         }
     }
 
     private void unequipByType(String memberId, String type) {
         List<InventoryDto> list = inventoryDao.selectListByMemberId(memberId);
-        
         for (InventoryDto dto : list) {
             if (type.equals(dto.getPointItemType()) && "Y".equals(dto.getInventoryEquipped())) {
                 dto.setInventoryEquipped("N");
@@ -249,7 +150,7 @@ public class PointService {
             }
         }
     }
-   
+
     private void decreaseInventoryOrDelete(InventoryDto inven) {
         if (inven.getInventoryQuantity() > 1) {
             inven.setInventoryQuantity(inven.getInventoryQuantity() - 1);
@@ -259,193 +160,82 @@ public class PointService {
         }
     }
 
-    // 찜 관련 로직
+    @Transactional
+    public void cancelItem(String loginId, long inventoryNo) {
+        InventoryDto inven = inventoryDao.selectOne(inventoryNo);
+        PointItemStoreDto item = pointItemDao.selectOneNumber(inven.getInventoryItemNo());
+        addPoint(loginId, (int)item.getPointItemPrice(), "GET");
+        item.setPointItemStock(item.getPointItemStock() + 1);
+        pointItemDao.update(item);
+        decreaseInventoryOrDelete(inven);
+    }
+
+    // [5] 후원 및 내역 조회
+    @Transactional
+    public void donatePoints(String loginId, String targetId, int amount) {
+        addPoint(loginId, -amount, "SEND");
+        addPoint(targetId, amount, "RECEIVED");
+    }
+
+    public PointHistoryPageVO getHistoryList(String loginId, int page, String type) {
+        int size = 10;
+        int startRow = (page - 1) * size + 1;
+        int endRow = page * size;
+        return PointHistoryPageVO.builder()
+                .list(pointHistoryDao.selectListByMemberIdPaging(loginId, startRow, endRow, type))
+                .totalPage((pointHistoryDao.countHistory(loginId, type) + size - 1) / size)
+                .currentPage(page)
+                .build();
+    }
+
+    // [6] 위시리스트
     @Transactional
     public boolean toggleWish(String loginId, long itemNo) {
         PointItemWishVO vo = PointItemWishVO.builder().memberId(loginId).itemNo(itemNo).build();
-        int count = pointWishlistDao.checkWish(vo); 
-        if (count > 0) {
-            pointWishlistDao.delete(vo);
-            return false;
-        } else {
-            pointWishlistDao.insert(vo);
-            return true;
-        }
+        if (pointWishlistDao.checkWish(vo) > 0) { pointWishlistDao.delete(vo); return false; }
+        else { pointWishlistDao.insert(vo); return true; }
     }
-    
-    public List<Long> getMyWishItemNos(String loginId) { 
-        return pointWishlistDao.selectMyWishItemNos(loginId); 
-    }
-    
-    public List<PointWishlistDto> getMyWishlist(String loginId) { 
-        return pointWishlistDao.selectMyWishlist(loginId); 
-    }
-    
-    @Transactional
-    public void deleteWish(String loginId, long itemNo) {
-        PointItemWishVO vo = PointItemWishVO.builder().memberId(loginId).itemNo(itemNo).build();
-        pointWishlistDao.delete(vo);
-    }
-    
-    // 출석체크/후원/포인트지급
-    @Transactional
-    public void addAttendancePoint(String loginId, int amount, String memo) {
-        addPoint(loginId, amount, "GET");
-    }
+    public List<Long> getMyWishItemNos(String id) { return pointWishlistDao.selectMyWishItemNos(id); }
+    public List<PointWishlistDto> getMyWishlist(String id) { return pointWishlistDao.selectMyWishlist(id); }
+    @Transactional public void deleteWish(String id, long no) { pointWishlistDao.delete(PointItemWishVO.builder().memberId(id).itemNo(no).build()); }
 
-    @Transactional
-    public void donatePoints(String loginId, String targetId, int amount) {
-
-        // 1. 잔액 체크
-        if (memberDao.selectOne(loginId).getMemberPoint() < amount) {
-            throw new RuntimeException("잔액 부족");
-        }
-
-        // 2. 보내는 사람 차감 (여기서 실패하면 바로 에러)
-        boolean sendResult = addPoint(loginId, -amount, "SEND");
-        if (!sendResult) {
-            throw new RuntimeException("보내는 사람 포인트 차감 실패 (사용자 정보 확인 필요)");
-        }
-
-        // 3. 받는 사람 지급 (여기가 핵심! 실패 시 에러를 던져야 롤백됨)
-        boolean receiveResult = addPoint(targetId, amount, "RECEIVED");
-        if (!receiveResult) {
-            // ★ 여기서 에러를 던져야 1번 과정(보낸 사람 차감)도 같이 취소됩니다.
-            throw new RuntimeException("받는 사람 포인트 지급 실패 (아이디가 올바르지 않습니다)");
-        }
-    }
-    // 룰렛
+    // [7] 룰렛 및 정보 조회
     @Transactional
     public int playRoulette(String loginId) {
-        List<InventoryDto> myItems = inventoryDao.selectListByMemberId(loginId);
-        InventoryDto ticket = myItems.stream()
-                .filter(i -> "RANDOM_ROULETTE".equals(i.getPointItemType())) 
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("룰렛 이용권이 없습니다."));
-
-        int targetIndex = 0; 
-        double random = Math.random() * 100;
-        
-        if (random < 5) targetIndex = 4;
-        else if (random < 15) targetIndex = 0;
-        else if (random < 25) targetIndex = 3;
-        else if (random < 55) targetIndex = 2;
-        else targetIndex = (Math.random() < 0.5) ? 1 : 5;
-
-        int rewardPoint = 0;
-        boolean consumeTicket = true;
-
-        switch (targetIndex) {
-            case 0: rewardPoint = 1000; break;
-            case 2: rewardPoint = 500; break;
-            case 4: rewardPoint = 2000; break;
-            case 3: consumeTicket = false; break; 
-            default: break; 
-        }
-
-        if (consumeTicket) {
-            decreaseInventoryOrDelete(ticket);
-        }
-
-        if (rewardPoint > 0) {
-            // ★ [수정] 룰렛 결과 지급도 "GET"으로 통일
-            addPoint(loginId, rewardPoint, "GET");
-        }
+        InventoryDto ticket = inventoryDao.selectListByMemberId(loginId).stream()
+                .filter(i -> "RANDOM_ROULETTE".equals(i.getPointItemType())).findFirst().orElseThrow();
+        int targetIndex = (int)(Math.random() * 6);
+        int reward = (targetIndex == 4) ? 2000 : (targetIndex == 0) ? 1000 : 0;
+        decreaseInventoryOrDelete(ticket);
+        if (reward > 0) addPoint(loginId, reward, "GET");
         dailyQuestService.questProgress(loginId, "ROULETTE");
         return targetIndex;
     }
 
-    public String getUserNickStyle(String loginId) {
-        // 1. 내 아이템 조회 (위에서 수정한 Mapper가 실행됨)
-        List<InventoryDto> myItems = inventoryDao.selectListByMemberId(loginId);
-        
-        // 2. 장착된 DECO_NICK 아이템 찾기
-        InventoryDto equippedItem = myItems.stream()
-            .filter(i -> "Y".equals(i.getInventoryEquipped()) 
-                      && "DECO_NICK".equals(i.getPointItemType()))
-            .findFirst()
-            .orElse(null);
+    public MemberPointVO getMyPointInfo(String id) {
+        MemberDto m = memberDao.selectMap(id);
+        if (m == null) return null;
 
-        // 3. 없으면 빈값 리턴
-        if (equippedItem == null) return "";
+        // 아이콘은 이미지가 필요하므로 Src 유지, 나머지는 Style(Content) 조회
+        String iconSrc = memberIconDao.selectEquippedIconSrc(id);
+        String frameStyle = memberIconDao.selectEquippedFrameStyle(id); // "frame-gold"
+        String bgStyle = memberIconDao.selectEquippedBgStyle(id);       // "bg-ice"
+        String nickStyle = memberIconDao.selectEquippedNickStyle(id);
 
-        // 4. [수정] 아이템 이름으로 검사할 필요 없이, Content 값을 바로 리턴!
-        // (DB에 'nick-rainbow'라고 저장되어 있다면 그게 그대로 나옴)
-        String style = equippedItem.getPointItemContent();
-        
-        return style != null ? style : "";
-    }
- // [수정] 내 포인트 및 치장 정보 조회
-    public MemberPointVO getMyPointInfo(String loginId) {
-        // 1. 회원 정보 조회
-        MemberDto member = memberDao.selectMap(loginId);
-        if (member == null) return null;
+        if (iconSrc == null) iconSrc = "https://i.postimg.cc/Wb3VBy9v/null.png";
 
-        // 2. 장착 중인 아이콘 조회 (Dao가 null을 리턴하면 기본 이미지로 대체)
-        String equippedIconSrc = memberIconDao.selectEquippedIconSrc(loginId);
-        if (equippedIconSrc == null) {
-            // 기본 이미지 경로 (프로젝트 상황에 맞춰 수정하세요)
-            equippedIconSrc = "https://i.postimg.cc/Wb3VBy9v/null.png"; 
-        }
-
-        // 3. 닉네임 스타일 조회 (helper 메서드 사용)
-        String nickStyle = getUserNickStyle(loginId);
-
-        // 4. 관리자는 무조건 관리자 스타일 적용
-        if ("관리자".equals(member.getMemberLevel())) {
-            nickStyle = "nick-admin";
-        }
-
-        // 5. VO 빌드 및 반환
         return MemberPointVO.builder()
-                .memberId(member.getMemberId())
-                .nickname(member.getMemberNickname())
-                .point(member.getMemberPoint())
-                .level(member.getMemberLevel())
+                .nickname(m.getMemberNickname())
+                .point(m.getMemberPoint())
+                .iconSrc(iconSrc)
+                .frameSrc(frameStyle) // VO의 필드명은 유지하되 데이터는 클래스명 전달
+                .bgSrc(bgStyle)
                 .nickStyle(nickStyle)
-                .iconSrc(equippedIconSrc)
                 .build();
     }
-    public PointHistoryPageVO getHistoryList(String loginId, int page, String type) {
-        int size = 10;
-        int totalCount = pointHistoryDao.countHistory(loginId, type);
-        int totalPage = (totalCount + size - 1) / size;
-        
-        int startRow = (page - 1) * size + 1;
-        int endRow = page * size;
-    
-        List<PointHistoryDto> list = pointHistoryDao.selectListByMemberIdPaging(loginId, startRow, endRow, type);
-        
-        return PointHistoryPageVO.builder()
-                .list(list)
-                .totalPage(totalPage)
-                .currentPage(page)
-                .totalCount(totalCount)
-                .build();
-    }
-
-    /**
-     * 포인트 증감 전용 메서드
-     * amount > 0 : 지급
-     * amount < 0 : 차감
-     */
-    @Transactional
-    public boolean addPoint(String memberId, int amount, String trxType) {
-
-        MemberDto dto = new MemberDto();
-        dto.setMemberId(memberId);
-        dto.setMemberPoint(amount); 
-
-        boolean result = memberDao.upPoint(dto);
-
-        if (result) {
-            PointHistoryDto history = PointHistoryDto.builder()
-                .pointHistoryMemberId(memberId)
-                .pointHistoryAmount(amount)
-                .pointHistoryTrxType(trxType)
-                .build();
-            pointHistoryDao.insert(history);
-        }
-        return result;
-    }
+    // 관리자 기능
+    @Transactional public void addItem(String id, PointItemStoreDto d) { pointItemDao.insert(d); }
+    @Transactional public void editItem(String id, PointItemStoreDto d) { pointItemDao.update(d); }
+    @Transactional public void deleteItem(String id, long no) { pointItemDao.delete(no); }
+    @Transactional public void discardItem(String id, long no) { inventoryDao.delete(no); }
 }
