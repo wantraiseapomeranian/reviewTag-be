@@ -17,31 +17,44 @@ public class DailyQuestRestController {
 
     @Autowired private DailyQuestService dailyQuestService;
 
-    // 1. 퀘스트 목록 조회 (기존 유지)
+    // 1. 퀘스트 목록 조회
     @GetMapping("/list")
     public List<DailyQuestVO> list(@RequestAttribute(value="loginId", required=false) String loginId) {
         if(loginId == null) return List.of();
         return dailyQuestService.getQuestList(loginId);
     }
 
-    // 2. [추가] 랜덤 퀴즈 문제 요청
+    // [수정] 2. 랜덤 퀴즈 문제 요청
+    // 변경점: loginId를 서비스에 전달해야 함 (오늘 풀었는지 확인용)
     @GetMapping("/quiz/random")
-    public DailyQuizVO getRandomQuiz() {
-        return dailyQuestService.getRandomQuiz();
+    public DailyQuizVO getRandomQuiz(@RequestAttribute("loginId") String loginId) {
+        // 이미 풀었다면 서비스에서 null을 리턴함 -> 프론트에서 null 체크 필요
+        return dailyQuestService.getRandomQuiz(loginId);
     }
 
-    // 3. [추가] 퀴즈 정답 확인 및 진행도 업데이트
+    // [수정] 3. 퀴즈 정답 제출
+    // 변경점: correctAnswer(정답)를 받는 게 아니라 quizNo(문제번호)를 받음
     @PostMapping("/quiz/check")
-    public String checkQuiz(@RequestAttribute("loginId") String loginId, @RequestBody Map<String, String> body) {
-        String answer = body.get("answer");
-        String correctAnswer = body.get("correctAnswer");
-        
-        // 서비스에서 정답 확인 후 맞으면 DB에 count를 올림
-        boolean isCorrect = dailyQuestService.checkQuizAndProgress(loginId, answer, correctAnswer);
-        return isCorrect ? "success" : "fail";
-    }
+    public String checkQuiz(@RequestAttribute("loginId") String loginId, @RequestBody Map<String, Object> body) {
+        // [수정] 방어 코드 추가: quizNo가 없으면 에러 메시지 반환
+        if (body.get("quizNo") == null) {
+            System.out.println("오류: 프론트엔드에서 quizNo가 오지 않았습니다.");
+            return "fail:quizNo is null";
+        }
 
-    // 4. 보상 받기 (기존 유지)
+        try {
+            int quizNo = Integer.parseInt(String.valueOf(body.get("quizNo")));
+            String userAnswer = (String) body.get("answer");
+            
+            boolean isCorrect = dailyQuestService.checkQuizAndProgress(loginId, quizNo, userAnswer);
+            
+            return isCorrect ? "success" : "fail";
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return "fail:invalid number format";
+        }
+    }
+    // 4. 보상 받기
     @PostMapping("/claim")
     public String claim(@RequestAttribute("loginId") String loginId, @RequestBody Map<String, String> body) {
         try {

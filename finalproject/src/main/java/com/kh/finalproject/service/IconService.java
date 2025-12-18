@@ -36,16 +36,22 @@ public class IconService {
     }
 
     public IconPageVO getIconList(int page, String type) {
-        int size = 10; 
+        int size = 10; // 페이지당 10개 표시
         
+        // (1) Oracle 페이징 계산 (startRow, endRow)
+        int endRow = page * size;
+        int startRow = endRow - (size - 1);
+        
+        // (2) DAO 호출 -
         int totalCount = iconDao.countIcons(type);
+        
+        // (3) DAO 호출 - 
+        List<IconDto> list = iconDao.selectListPaging(startRow, endRow, type);
+
+        // (4) 전체 페이지 수 계산
         int totalPage = (totalCount + size - 1) / size;
         
-        int startRow = (page - 1) * size + 1;
-        int endRow = page * size;
-
-        List<IconDto> list = iconDao.selectListPaging(startRow, endRow, type);
-        
+        // (5) 결과 반환 (IconPageVO)
         return IconPageVO.builder()
                 .list(list)
                 .totalPage(totalPage)

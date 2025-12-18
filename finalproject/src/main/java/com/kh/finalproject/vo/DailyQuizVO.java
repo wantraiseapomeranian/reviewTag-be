@@ -5,8 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data @Builder @NoArgsConstructor @AllArgsConstructor
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class DailyQuizVO {
-    private String quizQuestion;
-    private String quizAnswer;
+    private int quizNo;          // 퀴즈 번호
+    private String quizQuestion; // 문제 내용
+    private String quizAnswer;   // 정답 (사용자에게는 안 보여주고 검증용으로 씀)
 }
