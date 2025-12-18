@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.kh.finalproject.dto.BoardDto;
+import com.kh.finalproject.dto.QuizDto;
 import com.kh.finalproject.vo.PageVO;
 
 @Repository
@@ -87,9 +88,23 @@ public class BoardDao {
 	}
 
 	// 삭제
-	public void delete(int boardNo) {
-		sqlSession.delete("board.delete", boardNo);
+	public boolean delete(int boardNo) {
+		return sqlSession.delete("board.delete", boardNo)>0;
 	}
+	
+	//신고 누적 횟수 변경
+	public boolean increaseBoardReportCount(int boardNo) {
+		int result = sqlSession.update("board.updateBoardReportCount", boardNo);
+		
+		return result > 0;
+	}
+		
+	
+		
+	//신고 삭제시 카운트 1 감소 메소드
+	public boolean decreaseReportCount(int boardNo) {
+		return sqlSession.update("board.decreaseReportCount", boardNo) > 0;
+	}	
 
 
 
