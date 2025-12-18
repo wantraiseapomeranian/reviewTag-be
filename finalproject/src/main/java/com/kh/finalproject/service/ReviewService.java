@@ -32,45 +32,38 @@ public class ReviewService {
 	// 리뷰 삭제시 신뢰도 -1
 	@Transactional
 	public void deleteReview(Long reviewContents, Long reviewNo) {
-	    ReviewDto review = reviewDao.selectOne(reviewContents, reviewNo);
-	    if (review == null) throw new TargetNotfoundException();
+		ReviewDto review = reviewDao.selectOne(reviewContents, reviewNo);
+		if (review == null)
+			throw new TargetNotfoundException();
 
-	    String writer = review.getReviewWriter();
+		String writer = review.getReviewWriter();
 
-	    int reliability = memberDao.selectReliability(writer);
-	    if (reliability > 0) {
-	        memberDao.updateReliability(writer, -1);
-	    }
+		int reliability = memberDao.selectReliability(writer);
+		if (reliability > 0) {
+			memberDao.updateReliability(writer, -1);
+		}
 
-	    reviewDao.delete(reviewContents, reviewNo);
+		reviewDao.delete(reviewContents, reviewNo);
 	}
-
 
 	// 좋아요에 대한 신뢰도 갱신 (3좋아요 1신뢰도)
 	public void LikeReviewRel(Long reviewNo) {
 		String writer = reviewDao.findWriterByReviewNo(reviewNo);
 
 		int totalLike = reviewLikeDao.countTotalLikeByWriter(writer);
-		int likeReliability = totalLike / 3; 
-		System.out.println("총 좋아요 :"+totalLike); 
-		System.out.println("좋아요가 3개일 시, 1신뢰도 값:"+likeReliability);
-		
-		int reviewCount = reviewDao.countReviewByWriter(writer); // 총 리뷰 개수
+		int likeReliability = totalLike / 3;
+//		System.out.println("총 좋아요 :"+totalLike); 
+//		System.out.println("좋아요가 3개일 시, 1신뢰도 값:"+likeReliability);
+
+		int reviewCount = reviewDao.countReviewByWriter(writer);
 //		System.out.println("총 리뷰 개수 :"+reviewCount); 
 
-		
 		////////////////////////
-		
-		int totalReliability = likeReliability + reviewCount;
-		System.out.println("총 신뢰도 :"+totalReliability); //내가 생각하는 원래 신뢰도 값
-		
-//		int currentReliability = memberDao.selectReliability(writer); // 현재 신뢰도를 보여주는 값
-//		int currentLikeReliability = currentReliability - reviewCount; // 현재 신뢰도 - 리뷰 개수
-//		int diff = likeReliability - currentLikeReliability; //좋아요로만 오른 신뢰도끼리 빼기
 
+		int totalReliability = likeReliability + reviewCount;
+		System.out.println("총 신뢰도 :" + totalReliability);
 
 		memberDao.updateReliabilitySet(writer, totalReliability);
-		
 	}
 
 }
