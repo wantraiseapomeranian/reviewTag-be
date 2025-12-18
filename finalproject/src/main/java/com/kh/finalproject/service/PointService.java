@@ -63,7 +63,7 @@ public class PointService {
     @Transactional
     public void addAttendancePoint(String loginId, int amount, String memo) {
         // memo는 히스토리 trxType으로 활용하거나 로그용으로 사용
-        addPoint(loginId, amount, "GET"); 
+        addPoint(loginId, amount, "GET");
     }
 
     // [3] 상점 트랜잭션 (구매/선물)

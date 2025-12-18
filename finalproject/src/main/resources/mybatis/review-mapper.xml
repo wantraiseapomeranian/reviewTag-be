@@ -21,29 +21,28 @@
 	<select id="selectList" resultType="ReviewDto">
 		select * from review where review_contents = #{reviewContents} order by review_no desc
 	</select>
+
 	<!-- 내리뷰 조회 -->
-	<select id="selectByUserAndContents" resultType="ReviewDto">
-		select * from review where review_writer = #{loginId} and review_contents = #{reviewContents}
+	<select id="selectByUserAndContents" resultType="ReviewVO">
+		select A.*,  B.member_nickname, B.member_reliability 
+		from review A join member B on A.review_writer = B.member_id 
+		where review_writer = #{loginId} and review_contents = #{reviewContents}
 	</select>
 	
-	<!-- 단일(상세)조회 -->
-	<select id="selectOne" resultType="ReviewDto">
-		select * from review where
-		review_contents = #{reviewContents} and
-		review_no = #{reviewNo}
+	<!-- 단일(상세)조회 테스트 -->
+	<select id="selectOne" resultType="ReviewVO">
+		select A.*, B.member_nickname, B.member_reliability 
+		from review A join member B on A.review_writer = B.member_id 
+		where review_contents = #{reviewContents} and review_no = #{reviewNo}
 	</select>
 	
-	<!-- 컨텐츠 제목으로 조회 -->
-<!-- 	<select id="detail" resultType="ReviewDto">	 -->
-<!-- 		select A.* from review A join contents B  on A.review_contents -->
-<!-- 		= B.contents_id where instr(B.contents_title, #{contentsTitle}) > 0   -->
-<!-- 		order by A.review_wtime desc -->
-<!-- 	</select> -->
+	
 	
 	<!-- 컨텐츠 아이디로 조회 -->
-	<select id="selectListByContentsId" resultType="ReviewDto">
-		select * from review where review_contents = #{reviewContents}
-		order by review_wtime desc
+	<select id="selectListByContentsId" resultType="ReviewVO">
+		select A.*, B.member_nickname, B.member_reliability 
+		from review A join member B on A.review_writer = B.member_id 
+		where review_contents = #{reviewContents} order by review_wtime desc
 	</select>
 	
 	

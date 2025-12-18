@@ -19,7 +19,9 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class ReviewVO {
-	private String memberNickname;
+	private String memberNickname; //멤버 닉네임 (+추가)
+	@NotNull
+	private Integer memberReliability; //멤버 신뢰도 (+추가)
 	private Long reviewNo; 
 	private Long reviewContents;
 	private String reviewWriter;

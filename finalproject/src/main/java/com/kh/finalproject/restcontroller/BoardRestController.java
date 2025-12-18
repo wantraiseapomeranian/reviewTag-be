@@ -1,10 +1,8 @@
 package com.kh.finalproject.restcontroller;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,14 +26,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.finalproject.dao.BoardDao;
 import com.kh.finalproject.dao.BoardResponseDao;
+import com.kh.finalproject.dao.MemberDao;
 import com.kh.finalproject.dao.ReplyDao;
 import com.kh.finalproject.dto.BoardDto;
 import com.kh.finalproject.dto.BoardResponseDto;
+import com.kh.finalproject.dto.MemberDto;
 import com.kh.finalproject.error.TargetNotfoundException;
 import com.kh.finalproject.service.AttachmentService;
-
 import com.kh.finalproject.service.DailyQuestService;
-
+import com.kh.finalproject.service.PointService;
 import com.kh.finalproject.vo.BoardResponseVO;
 import com.kh.finalproject.vo.PageResponseVO;
 import com.kh.finalproject.vo.PageVO;
@@ -58,13 +57,19 @@ public class BoardRestController {
 	private DailyQuestService dailyQuestService;
 	@Autowired
 	private ReplyDao replyDao;
-
+	@Autowired
+	private PointService pointService;
+	@Autowired
+	private MemberDao memberDao;
 
 	// 게시글 등록
 	@PostMapping("/")
-	public void insert(@RequestBody BoardDto boardDto) {
-		int boardNo = boardDao.insert(boardDto);
-		
+	public void insert(@RequestAttribute TokenVO tokenVO,
+								@RequestBody BoardDto boardDto) {
+		String loginId = tokenVO.getLoginId();
+		int boardNo =  boardDao.insert(boardDto);
+		int getPoint = 10;
+		pointService.addAttendancePoint(loginId, getPoint, "GET");
 		if(boardDto.getAttachmentNoList() != null) {
 			for(int attachmentNo : boardDto.getAttachmentNoList()) {
 				boardDao.connect(boardNo, attachmentNo);
@@ -173,15 +178,23 @@ public class BoardRestController {
 		boardDao.update(boardDto);
 	}
 
-
-
 	// 게시글 삭제
 	@DeleteMapping("/{boardNo}")
-	public void delete(@PathVariable int boardNo) {
+	public void delete(@RequestAttribute TokenVO tokenVO,@PathVariable int boardNo) {
+		String loginId = tokenVO.getLoginId();
 		BoardDto boardDto = boardDao.selectOne(boardNo);
-
 		if(boardDto == null) throw new TargetNotfoundException("존재하지 않는 글");
-
+		
+		// 유저가 가지고있는 포인트 확인해서 변경
+		MemberDto memberDto = memberDao.selectOne(loginId);
+		int losePoint = -10; // 삭제로 잃는 포인트
+		int point = memberDto.getMemberPoint();  
+		if(point >= 10) {
+			pointService.addAttendancePoint(loginId, losePoint, "USE");
+		}
+		else {
+			pointService.addAttendancePoint(loginId, -point, "USE");
+		}
 
 		Document document = Jsoup.parse(boardDto.getBoardText());
 		Elements elements = document.select(".cutom-image");

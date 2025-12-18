@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.kh.finalproject.dto.ReviewDto;
+import com.kh.finalproject.vo.ReviewVO;
 
 @Repository
 public class ReviewDao {
@@ -21,20 +22,27 @@ public class ReviewDao {
 	}
 	
 	//전체 조회
-	public List<ReviewDto> selectByContents(Long reviewContents) { //전체
+	public List<ReviewVO> selectByContents(Long reviewContents) { //전체
 		return sqlSession.selectList("review.selectList", reviewContents);
 	}
 	
 
-	//단일 조회
-	public ReviewDto selectOne(Long reviewContents , Long reviewNo) {
+	//단일 조회(로직용)
+//	public ReviewDto selectOne(Long reviewContents , Long reviewNo) {
+//		Map<String, Object> map2 = new HashMap<>();
+//		map2.put("reviewContents", reviewContents);
+//		map2.put("reviewNo", reviewNo);
+//		return sqlSession.selectOne("review.selectOne", map2);
+//	}
+	//단일 조회(닉네임+신뢰도)
+	public ReviewVO selectOne(Long reviewContents , Long reviewNo) {
 		Map<String, Object> map2 = new HashMap<>();
 		map2.put("reviewContents", reviewContents);
 		map2.put("reviewNo", reviewNo);
 		return sqlSession.selectOne("review.selectOne", map2);
 	}
 	
-	public ReviewDto selectByUserAndContents(String loginId, Long reviewContents) {
+	public ReviewVO selectByUserAndContents(String loginId, Long reviewContents) {
 	    Map<String, Object> map = new HashMap<>();
 	    map.put("loginId", loginId);
 	    map.put("reviewContents", reviewContents);
@@ -46,7 +54,6 @@ public class ReviewDao {
 	public List<ReviewDto> selectListByContentsId (Long reviewContents) {
 		return sqlSession.selectList("review.selectListByContentsId", reviewContents);
 	}
-
 	
 	public ReviewDto selectOne(Long reviewNo) {
 		return sqlSession.selectOne("review.selectOne", reviewNo);

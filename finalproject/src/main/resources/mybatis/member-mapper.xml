@@ -147,9 +147,7 @@
 		select member_reliability
 		from member
 		where member_id = #{memberId}
-	</select>
-	
-	
+	</select>		
 	
 	<update id="deleteReliability">
 		update member
@@ -228,5 +226,48 @@
         WHERE rn BETWEEN #{start} AND #{end}
     </select>
 
+
+    <select id="countPointAdminList" resultType="int">
+        SELECT COUNT(*) FROM member
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (member_id LIKE '%' || #{keyword} || '%' 
+                 OR member_nickname LIKE '%' || #{keyword} || '%')
+        </if>
+    </select>
+
+    <select id="selectPointAdminList" resultType="com.kh.finalproject.dto.MemberDto">
+        SELECT * FROM (
+            SELECT TMP.*, ROWNUM RN FROM (
+                SELECT 
+                    member_id AS "memberId", 
+                    member_nickname AS "memberNickname", 
+                    member_point AS "memberPoint", 
+                    member_level AS "memberLevel", 
+                    to_char(member_join, 'YYYY-MM-DD') as "memberJoinDate"
+                FROM member
+                WHERE 1=1
+                <if test="keyword != null and keyword != ''">
+                    AND (member_id LIKE '%' || #{keyword} || '%' 
+                         OR member_nickname LIKE '%' || #{keyword} || '%')
+                </if>
+                ORDER BY member_join DESC
+            ) TMP
+        )
+        WHERE RN BETWEEN #{start} AND #{end}
+    </select>
+
+    <update id="adminUpdatePoint">
+        UPDATE member 
+        SET member_point = member_point + #{amount}
+        WHERE member_id = #{memberId}
+    </update>
+
+    <update id="adminUpdateMemberInfo">
+        UPDATE member
+        SET member_nickname = #{memberNickname},
+            member_level = #{memberLevel}
+        WHERE member_id = #{memberId}
+    </update>
 
 </mapper>

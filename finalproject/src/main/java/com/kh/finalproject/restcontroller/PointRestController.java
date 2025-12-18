@@ -116,55 +116,5 @@ public class PointRestController {
         }
     }
 
-    // =============================================================
-    // [3] 아이콘 관리자 기능 (목록, 등록, 수정, 삭제)
-    // =============================================================
-    // 1. 관리자용 아이콘 전체 목록 (페이징)
-    // URL: GET /point/icon/admin/list?page=1&type=ALL
-    @GetMapping("/icon/admin/list")
-    public IconPageVO adminIconList(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "ALL") String type) {
-        
-        return iconService.getIconList(page, type);
-    }
-
-    // 2. 아이콘 등록
-    // URL: POST /point/icon/admin/add
-    @PostMapping("/icon/admin/add")
-    public String addIcon(@RequestBody IconDto dto) {
-        try {
-            iconService.addIcon(dto);
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-    }
-
-    // 3. 아이콘 수정
-    // URL: POST /point/icon/admin/edit
-    @PostMapping("/icon/admin/edit")
-    public String editIcon(@RequestBody IconDto dto) {
-        try {
-            iconService.editIcon(dto);
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-    }
-
-    // 4. 아이콘 삭제
-    // URL: DELETE /point/icon/admin/delete/{iconId}
-    @DeleteMapping("/icon/admin/delete/{iconId}")
-    public String deleteIcon(@PathVariable int iconId) {
-        try {
-            iconService.removeIcon(iconId);
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-    }
+  
 }

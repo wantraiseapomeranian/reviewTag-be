@@ -9,6 +9,7 @@ import com.kh.finalproject.dao.ReviewDao;
 import com.kh.finalproject.dao.ReviewLikeDao;
 import com.kh.finalproject.dto.ReviewDto;
 import com.kh.finalproject.error.TargetNotfoundException;
+import com.kh.finalproject.vo.ReviewVO;
 
 @Service
 public class ReviewService {
@@ -32,7 +33,7 @@ public class ReviewService {
 	// 리뷰 삭제시 신뢰도 -1
 	@Transactional
 	public void deleteReview(Long reviewContents, Long reviewNo) {
-		ReviewDto review = reviewDao.selectOne(reviewContents, reviewNo);
+		ReviewVO review = reviewDao.selectOne(reviewContents, reviewNo);
 		if (review == null)
 			throw new TargetNotfoundException();
 
