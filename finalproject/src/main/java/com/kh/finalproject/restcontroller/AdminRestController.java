@@ -20,17 +20,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.finalproject.dao.BoardDao;
 import com.kh.finalproject.dao.DailyQuizDao;
 import com.kh.finalproject.dao.MemberDao;
 import com.kh.finalproject.dao.MemberTokenDao;
 import com.kh.finalproject.dto.IconDto;
 import com.kh.finalproject.dto.MemberDto;
 import com.kh.finalproject.dto.QuizDto;
+import com.kh.finalproject.error.NeedPermissionException;
 import com.kh.finalproject.error.TargetNotfoundException;
 import com.kh.finalproject.service.AdminService;
 import com.kh.finalproject.service.IconService;
 import com.kh.finalproject.service.QuizService;
 import com.kh.finalproject.service.TokenService;
+import com.kh.finalproject.vo.BoardReportDetailVO;
+import com.kh.finalproject.vo.BoardReportStatsVO;
 import com.kh.finalproject.vo.DailyQuizVO;
 import com.kh.finalproject.vo.IconPageVO;
 import com.kh.finalproject.vo.PageResponseVO;
@@ -61,10 +65,18 @@ public class AdminRestController {
     
 	@Autowired
 	private IconService iconService;
+	
     @Autowired
     private SqlSession sqlSession; // [추가] 포인트 관리 쿼리 실행을 위해 추가
+    
 	@Autowired
 	private DailyQuizDao dailyQuizDao;
+	
+	@Autowired
+	private BoardDao boardDao;
+	
+	
+	
 	//기존 회원 목록 조회(관리자 제외, 일반 페이징)
 	@GetMapping("/members") 
 	public PageResponseVO getMemberList(
@@ -228,73 +240,76 @@ public class AdminRestController {
     }
     // -------------------------------------------------------------
 
-	//퀴즈 신고 관리 페이지
-	@GetMapping("/quizzes/reports")
-	public List<QuizReportStatsVO> getReportList(
-			@RequestParam String status,
-			@RequestAttribute TokenVO tokenVO,
-			@RequestParam(defaultValue = "1") Integer page
-			) {
-    	int size = 2; // 한 페이지당 보여줄 개수 
-        
-        // Oracle 페이징 계산 (1페이지: 1~12, 2페이지: 13~24 ...)
-        int end = page * size;
-        int start = end - (size - 1);
-        
-        Map<String, Object> params = new HashMap<>();
-        params.put("start", start);
-        params.put("end", end);
-        
-		String loginLevel = tokenVO.getLoginLevel();
-		params.put("loginLevel", loginLevel);
-		params.put("status", status);
-		 List<QuizReportStatsVO> list = adminService.getReportedQuizList(params);
-		return list;
-	}
+    // -------------------------------------------------------------
 
-	//퀴즈 신고 상세 내역 페이지
-	@GetMapping("/quizzes/{quizId}/reports")
-	public List<QuizReportDetailVO> getReportDetail(
-			@PathVariable int quizId,
-			@RequestAttribute TokenVO tokenVO
-			) {
-		
-		String loginLevel = tokenVO.getLoginLevel();
-		
-        return adminService.getReportDetails(loginLevel, quizId);
-    }
-	
-	//퀴즈 삭제
-	@DeleteMapping("/quizzes/{quizId}")
-    public boolean deleteQuiz(
-    		@PathVariable long quizId,
-            @RequestAttribute TokenVO tokenVO
-            ) {
-        String loginId = tokenVO.getLoginId();
-        String loginLevel = tokenVO.getLoginLevel();
-		
-        return quizService.deleteQuiz(quizId, loginId, loginLevel);
-    }
-	
-	//퀴즈 상태 변경
-	@PatchMapping("/quizzes/{quizId}/status/{status}")
-	public boolean changeStatus(
-			@PathVariable long quizId,
-			@PathVariable String status,
-			@RequestAttribute TokenVO tokenVO
-			) {
-		
-		String loginId = tokenVO.getLoginId();
-		String loginLevel = tokenVO.getLoginLevel();
-		
-		//퀴즈 상태 변경
-		QuizDto quizDto = QuizDto.builder()
-					.quizId(quizId)
-					.quizStatus(status)
-				.build();
-		
-		return quizService.changeQuizStatus(quizDto, loginId, loginLevel);
-	}	
+  	//퀴즈 신고 관리 페이지
+  	@GetMapping("/quizzes/reports")
+  	public List<QuizReportStatsVO> getReportList(
+  			@RequestParam String status,
+  			@RequestAttribute TokenVO tokenVO,
+  			@RequestParam(defaultValue = "1") Integer page
+  			) {
+      	int size = 2; // 한 페이지당 보여줄 개수 
+          
+          // Oracle 페이징 계산 (1페이지: 1~12, 2페이지: 13~24 ...)
+          int end = page * size;
+          int start = end - (size - 1);
+          
+          Map<String, Object> params = new HashMap<>();
+          params.put("start", start);
+          params.put("end", end);
+          
+  		String loginLevel = tokenVO.getLoginLevel();
+  		params.put("loginLevel", loginLevel);
+  		params.put("status", status);
+  		 List<QuizReportStatsVO> list = adminService.getReportedQuizList(params);
+  		return list;
+  	}
+
+  	//퀴즈 신고 상세 내역 페이지
+  	@GetMapping("/quizzes/{quizId}/reports")
+  	public List<QuizReportDetailVO> getReportDetail(
+  			@PathVariable int quizId,
+  			@RequestAttribute TokenVO tokenVO
+  			) {
+  		
+  		String loginLevel = tokenVO.getLoginLevel();
+  		
+          return adminService.getReportDetails(loginLevel, quizId);
+      }
+  	
+  	//퀴즈 삭제
+  	@DeleteMapping("/quizzes/{quizId}")
+      public boolean deleteQuiz(
+      		@PathVariable long quizId,
+              @RequestAttribute TokenVO tokenVO
+              ) {
+          String loginId = tokenVO.getLoginId();
+          String loginLevel = tokenVO.getLoginLevel();
+  		
+          return quizService.deleteQuiz(quizId, loginId, loginLevel);
+      }
+  	
+  	//퀴즈 상태 변경
+  	@PatchMapping("/quizzes/{quizId}/status/{status}")
+  	public boolean changeStatus(
+  			@PathVariable long quizId,
+  			@PathVariable String status,
+  			@RequestAttribute TokenVO tokenVO
+  			) {
+  		
+  		String loginId = tokenVO.getLoginId();
+  		String loginLevel = tokenVO.getLoginLevel();
+  		
+  		//퀴즈 상태 변경
+  		QuizDto quizDto = QuizDto.builder()
+  					.quizId(quizId)
+  					.quizStatus(status)
+  				.build();
+  		
+  		return quizService.changeQuizStatus(quizDto, loginId, loginLevel);
+  	}	
+  	
 	@GetMapping("/dailyquiz/list")
     public Map<String, Object> list(
             @RequestParam(defaultValue = "1") int page,
@@ -336,6 +351,60 @@ public class AdminRestController {
         boolean result = dailyQuizDao.delete(quizNo);
         return result ? "success" : "fail";
     }
+    
+    // -------------------------------------------------------------
+
+  	//게시판 신고 관리 페이지
+  	@GetMapping("/board/reports")
+  	public List<BoardReportStatsVO> getBReportList(
+  			@RequestParam String status,
+  			@RequestAttribute TokenVO tokenVO,
+  			@RequestParam(defaultValue = "1") Integer page
+  			) {
+      	int size = 2; // 한 페이지당 보여줄 개수 
+          
+          // Oracle 페이징 계산 (1페이지: 1~12, 2페이지: 13~24 ...)
+          int end = page * size;
+          int start = end - (size - 1);
+          
+          Map<String, Object> params = new HashMap<>();
+          params.put("start", start);
+          params.put("end", end);
+          
+  		String loginLevel = tokenVO.getLoginLevel();
+  		params.put("loginLevel", loginLevel);
+  		params.put("status", status);
+  		 List<BoardReportStatsVO> list = adminService.getReportedBoardList(params);
+  		return list;
+  	}
+
+  	//게시글 신고 상세 내역 페이지
+  	@GetMapping("/board/{boardNo}/reports")
+  	public List<BoardReportDetailVO> getReportBDetail(
+  			@PathVariable int boardNo,
+  			@RequestAttribute TokenVO tokenVO
+  			) {
+  		
+  		String loginLevel = tokenVO.getLoginLevel();
+  		
+          return adminService.getReportBDetails(loginLevel, boardNo);
+      }
+  	
+  	//게시글 삭제
+  	@DeleteMapping("/board/{boardNo}")
+      public boolean deleteBoard(
+      		@PathVariable int boardNo,
+              @RequestAttribute TokenVO tokenVO
+              ) {
+          String loginId = tokenVO.getLoginId();
+          String loginLevel = tokenVO.getLoginLevel();
+          
+          if(!"관리자".equals(loginLevel) && loginId == null) throw new NeedPermissionException();
+  		
+          return boardDao.delete(boardNo);
+      }
+  	
+  	
 }
 
 
