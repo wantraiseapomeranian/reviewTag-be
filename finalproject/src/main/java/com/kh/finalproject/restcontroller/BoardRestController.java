@@ -63,10 +63,11 @@ public class BoardRestController {
 
 	private ReplyDao replyDao;
 	
-
+		
 	// 게시글 등록
 	@PostMapping("/")
 	public void insert(@RequestBody BoardDto boardDto) {
+		
 		int boardNo =  boardDao.insert(boardDto);
 		if(boardDto.getAttachmentNoList() != null) {
 			for(int attachmentNo : boardDto.getAttachmentNoList()) {

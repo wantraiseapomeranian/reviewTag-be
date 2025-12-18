@@ -47,19 +47,16 @@ public class ReviewRestController {
 
 
 	// 등록
-	@PostMapping("/")
-	public void insert(@RequestBody ReviewDto reviewDto) {
+    @PostMapping("/")
+    public void insert(@RequestBody ReviewDto reviewDto) {
+    	
+        reviewService.addReview(reviewDto); 
 
-		reviewDao.insert(reviewDto);
-
-		reviewService.addReview(reviewDto);
-
-
-		if (reviewDto.getReviewWriter() != null) {
+        // 퀘스트 진행 (서비스가 에러 없이 끝나면 실행됨)
+        if (reviewDto.getReviewWriter() != null) {
             dailyQuestService.questProgress(reviewDto.getReviewWriter(), "REVIEW");
-		
-	}
-	}
+        }
+    }
 	// 전체 리뷰 조회
 	@GetMapping("/reviewContents/{reviewContents}")
 	public List<ReviewDto> selectByContents(@PathVariable Long reviewContents) {
