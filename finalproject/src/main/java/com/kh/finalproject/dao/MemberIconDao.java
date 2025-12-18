@@ -86,8 +86,7 @@ public class MemberIconDao {
         // 인벤토리 번호(PK)만 알면 바로 장착 가능
         sqlSession.update("memberIcon.equipItem", inventoryNo);
     }
-    
-    
+ 
     public List<IconDto> selectIconList() {
     	return sqlSession.selectList("memberIcon.selectIconList");
     }
