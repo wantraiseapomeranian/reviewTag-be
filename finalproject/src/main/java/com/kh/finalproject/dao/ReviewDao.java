@@ -74,6 +74,11 @@ public class ReviewDao {
 		return sqlSession.selectOne("review.findWriterByReviewNo", reviewNo);
 	}
 	
+	//리뷰 개수 조회(좋아요 신뢰도 분리용)
+		public int countReviewByWriter(String writer) {
+			return sqlSession.selectOne("review.countReviewByWriter", writer);
+		}
+	
 	
 	//////////////////////////////////////////
 	

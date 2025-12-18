@@ -64,7 +64,7 @@ public class ReviewRestController {
 	@GetMapping("/reviewContents/{reviewContents}")
 	public List<ReviewDto> selectByContents(@PathVariable Long reviewContents) {
 		return reviewDao.selectByContents(reviewContents);
-	}
+	} 
 
 
 	
@@ -119,12 +119,7 @@ public class ReviewRestController {
        
         if(originDto == null) throw new TargetNotfoundException();
         reviewService.deleteReview(reviewContents, reviewNo);
-        
-        boolean success = reviewDao.delete(reviewContents, reviewNo);
-        if(!success) throw new TargetNotfoundException();
     }
-
-
 
 	// 좋아요 관련
 

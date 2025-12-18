@@ -138,6 +138,15 @@
 		where member_id=#{memberId}
 	</update>
 	
+	<!-- 현재 신뢰도 조회 -->
+	<select id="selectReliability" resultType="int">
+		select member_reliability
+		from member
+		where member_id = #{memberId}
+	</select>
+	
+	
+	
 	<update id="deleteReliability">
 		update member
 		set member_reliability = member_reliability - #{rel}

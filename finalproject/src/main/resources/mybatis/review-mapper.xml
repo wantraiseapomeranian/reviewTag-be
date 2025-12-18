@@ -81,6 +81,11 @@
 	<select id="findWriterByReviewNo" resultType="String">
 		select review_writer from review where review_no = ${reviewNo}
 	</select>
+	
+	<!-- 리뷰 개수 조회 (좋아요 신뢰도 분리) -->
+	<select id="countReviewByWriter" resultType="int">
+		select count(*) from review where review_writer = #{writer}
+	</select>
 
 	<!-- 좋아요 관련 -->
 	<update id="updateReviewLike">
