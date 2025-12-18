@@ -159,4 +159,21 @@ where board_no=#{boardNo}
 	select attachment_no from board_attachment where board_no = #{boardNo}
 </select>
 
+<!-- 신고 누적 횟수 변경 -->
+<update id="updateBoardReportCount">
+    update board
+    set
+        board_report_count = board_report_count + 1
+    where board_no = #{boardNo}
+</update>
+	
+<!-- 신고 삭제시 숫자 차감 기능 -->
+<update id="decreaseReportCount">
+    update board
+    set board_report_count = board_report_count - 1
+    where board_no = #{board}
+      	and board_report_count > 0 
+</update>
+	
+
 </mapper>
