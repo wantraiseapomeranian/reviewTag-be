@@ -26,6 +26,7 @@ public class TokenParsingInterceptor implements HandlerInterceptor{
 	
 	public boolean preHandle(HttpServletRequest request,
 										HttpServletResponse response, Object handler) throws Exception {
+		
 		String bearerToken = request.getHeader("Authorization");
 		if(bearerToken == null) throw new UnauthorizationException();
 		

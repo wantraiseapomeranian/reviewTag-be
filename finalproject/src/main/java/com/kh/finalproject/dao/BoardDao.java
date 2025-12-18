@@ -15,8 +15,10 @@ import com.kh.finalproject.vo.PageVO;
 public class BoardDao {
 
 	@Autowired
+
 	private SqlSession sqlSession;
-	
+
+
 	// 등록
 	public int insert(BoardDto boardDto) {
 		int boardNo = sqlSession.selectOne("board.sequence");
@@ -24,20 +26,35 @@ public class BoardDao {
 		sqlSession.insert("board.insert",boardDto);
 		return boardNo;
 	}
-	
+
 	// 조회 : 전체 조회
 	public List<BoardDto> selectList(){
 		return sqlSession.selectList("board.selectList");
 	}
+
 	// 조회 : 전체 조회 (페이지네이션)
 	public List<BoardDto> selectListWithPage(PageVO pageVO){
 		return sqlSession.selectList("board.selectListWithPage", pageVO);
 	}
-	public int countBoard() {
-		return sqlSession.selectOne("board.countBoard");
+
+	public int countBoard(String column, String keyword) {
+		Map<String, Object> param = new HashMap<>();
+		param.put("column", column);
+		param.put("keyword", keyword);
+		return sqlSession.selectOne("board.countBoard", param);
 	}
-	
-	
+
+	public List<BoardDto> selectWithPage(PageVO pageVO, String column, String keyword) {
+		Map<String, Object> param = new HashMap<>();
+		//param.put("pageVO", pageVO);
+		param.put("begin", pageVO.getBegin());
+		param.put("end", pageVO.getEnd());
+		param.put("column", column);
+		param.put("keyword", keyword);
+		return sqlSession.selectList("board.selectList", param);
+	}
+
+
 	// 조회 : 컨텐츠별 조회
 	// - 페이지네이션 O
 	public List<BoardDto> selectListByContents(Long boardContentsId,PageVO pageVO){
@@ -46,77 +63,52 @@ public class BoardDao {
 		param.put("pageVO", pageVO);
 		return sqlSession.selectList("board.selectListByContents", param);
 	}
+
 	public int countContentsBoard(long boardContentsId) {
 		return sqlSession.selectOne("board.countContentsBoard", boardContentsId);
 	}
-	
-	// 조회 : 검색어 조회(제목/작성자)
-	public List<BoardDto> selectForSearchWithPage(String keyword, String column, PageVO pageVO) {
-		Map<String, Object> param = new HashMap<>();
-		param.put("keyword", keyword);
-		param.put("column", column);
-		param.put("pageVO", pageVO);
-		
-		return sqlSession.selectList("board.selectForSearchWithPage", param);
-	}
-	public int countBoardForSearch(String keyword, String column) {
-		Map<String, Object> param = new HashMap<>();
-		param.put("keyword", keyword);
-		param.put("column", column);
-		
-		return sqlSession.selectOne("board.countBoardForSearch", param);
-	}
-	
-	// 조회 : 컨텐츠 제목으로 조회
-	public List<BoardDto> selectByContentsTitle(String contentsTitle, PageVO pageVO) {
-		Map<String, Object> param = new HashMap<>();
-		param.put("pageVO", pageVO);
-		param.put("contentsTitle", contentsTitle);
-		
-		return sqlSession.selectList("board.selectByContentsTitle", param);
-	}
-	public int countByContentsTitle(String contentsTitle) {
-		return sqlSession.selectOne("board.countByContentsTitle", contentsTitle);
-	}
-	
+
+
 	// 조회 : 컨텐츠별 5개 항목조회
 	// - contents detail 적용 / 페이지네이션 X
 	public List<BoardDto> selectListBy5Contents(Long boardContentsId){
 		return sqlSession.selectList("board.selectListBy5Contents", boardContentsId);
 	}
-	
+
 	// 상세조회
 	public BoardDto selectOne(int boardNo) {
 		return sqlSession.selectOne("board.detail", boardNo);
 	}
-	
+
+
 	// 수정
 	public boolean update(BoardDto boardDto) {
 		return sqlSession.update("board.update",boardDto)>0;
 	}
-	
+
 	// 삭제
 	public void delete(int boardNo) {
 		sqlSession.delete("board.delete", boardNo);
 	}
-	
-	
+
+
+
 	////////////////////첨부파일
 	public void connect(int boardNo, int attachmentNo) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("boardNo", boardNo);
 		params.put("attachmentNo", attachmentNo);
-		
 		sqlSession.insert("board.connect", params);
 	}
+
 	public int findAttachment(int boardNo) {
 		return sqlSession.selectOne("board.findAttachment", boardNo);
 	}
-	
+
+
 	//조회수
 	public int increaseViewCount(int boardNo) {
 		sqlSession.update("board.increaseViewCount", boardNo);
 		return sqlSession.selectOne("board.selectViewCount", boardNo);
 	}
-	
 }
