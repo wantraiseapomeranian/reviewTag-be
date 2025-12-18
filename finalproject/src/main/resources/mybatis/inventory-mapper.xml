@@ -75,7 +75,7 @@
         P.POINT_ITEM_CONTENT    AS "pointItemContent"
 
     FROM INVENTORY I
-    -- ★ [수정됨] 테이블 이름을 POINT_ITEM -> POINT_ITEM_STORE 로 변경
+
     JOIN POINT_ITEM_STORE P 
         ON I.INVENTORY_ITEM_NO = P.POINT_ITEM_NO
         
@@ -86,5 +86,22 @@
       DELETE FROM INVENTORY
       WHERE inventory_no = #{inventoryNo}
   </delete>
-  
+<select id="selectListByAdmin" resultType="InventoryDto">
+    SELECT 
+        I.INVENTORY_NO          AS "inventoryNo",
+        I.INVENTORY_MEMBER_ID   AS "inventoryMemberId",
+        I.INVENTORY_ITEM_NO     AS "inventoryItemNo",
+        I.INVENTORY_CREATED_AT  AS "inventoryCreatedAt",
+        I.INVENTORY_EQUIPPED    AS "inventoryEquipped",
+        P.POINT_ITEM_NAME       AS "pointItemName",
+        P.POINT_ITEM_SRC        AS "pointItemSrc"
+    FROM INVENTORY I
+    JOIN POINT_ITEM_STORE P 
+        ON I.INVENTORY_ITEM_NO = P.POINT_ITEM_NO
+    JOIN MEMBER M 
+        ON I.INVENTORY_MEMBER_ID = M.MEMBER_ID
+    WHERE I.INVENTORY_MEMBER_ID = #{memberId}
+      AND M.MEMBER_LEVEL != '관리자'
+    ORDER BY I.INVENTORY_CREATED_AT DESC
+</select>
 </mapper>

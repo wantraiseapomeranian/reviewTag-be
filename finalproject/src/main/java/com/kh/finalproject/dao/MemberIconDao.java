@@ -7,6 +7,8 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import com.kh.finalproject.dto.IconDto;
 import com.kh.finalproject.dto.MemberIconDto;
 
 @Repository
@@ -85,4 +87,16 @@ public class MemberIconDao {
         sqlSession.update("memberIcon.equipItem", inventoryNo);
     }
     
-}
+    
+    public List<IconDto> selectIconList() {
+    	return sqlSession.selectList("memberIcon.selectIconList");
+    }
+
+    public int deleteMemberIcon(long memberIconId) {
+        return sqlSession.delete("memberIcon.deleteMemberIcon",memberIconId);
+    }
+        public List<MemberIconDto> selectUserIcon(String memberId) {
+            return sqlSession.selectList("memberIcon.selectUserIconsDetail", memberId);
+        }
+    }
+

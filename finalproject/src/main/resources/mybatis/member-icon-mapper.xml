@@ -113,5 +113,35 @@
     SET INVENTORY_EQUIPPED = 'Y'
     WHERE INVENTORY_NO = #{inventoryNo}
 </update>
+ <!-- 특정 유저 아이콘 조회 (관리자 제외) -->
+    <select id="selectUserIconsDetail"
+            parameterType="string"
+            resultType="MemberIconDto">
+        SELECT 
+            MI.MEMBER_ICONS_ID          AS memberIconId,
+            MI.MEMBER_ICONS_MEMBER_ID   AS memberId,
+            MI.MEMBER_ICONS_ICON_ID     AS iconId,
+            MI.MEMBER_ICONS_OBTAIN_TIME AS memberIconObtainTime,
+            MI.IS_EQUIPPED              AS isEquipped,
+            I.ICON_NAME                 AS iconName,
+            I.ICON_RARITY               AS iconRarity,
+            I.ICON_SRC                  AS iconSrc
+        FROM MEMBER_ICONS MI
+        JOIN ICON I ON MI.MEMBER_ICONS_ICON_ID = I.ICON_ID
+        JOIN MEMBER M ON MI.MEMBER_ICONS_MEMBER_ID = M.MEMBER_ID
+        WHERE MI.MEMBER_ICONS_MEMBER_ID = #{memberId}
+          AND M.MEMBER_LEVEL != '관리자'
+    </select>
 
+    
+    <!-- 아이콘 회수 -->
+    <delete id="deleteMemberIcon">
+        DELETE FROM MEMBER_ICONS
+        WHERE MEMBER_ICONS_ID = #{memberIconId}
+    </delete>
+
+    <!-- 전체 아이콘 마스터 -->
+    <select id="selectIconList" resultType="IconDto">
+        SELECT * FROM ICON
+    </select>
 </mapper>

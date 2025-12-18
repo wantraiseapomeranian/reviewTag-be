@@ -25,13 +25,26 @@ public class ReviewService {
 	private ReviewLikeDao reviewLikeDao;
 
 	@Transactional
-	// 리뷰 작성시 신뢰도 +1
-	public void addReview(ReviewDto reviewDto) {
-		reviewDao.insert(reviewDto);
-		String writer = reviewDto.getReviewWriter();
-		
-		memberDao.updateReliability(writer, 1);
-	}
+    public void addReview(ReviewDto reviewDto) {
+        // 1. 중복 체크 (이미 쓴 리뷰가 있는지 확인)
+        // 기존에 있는 selectByUserAndContents 메소드를 활용합니다.
+        ReviewDto findDto = reviewDao.selectByUserAndContents(
+                reviewDto.getReviewWriter(), 
+                reviewDto.getReviewContents()
+        );
+
+        if (findDto != null) {
+            // 이미 리뷰가 존재하면 에러를 발생시켜 중단 (또는 return으로 조용히 종료)
+            throw new IllegalStateException("이미 이 콘텐츠에 리뷰를 작성하셨습니다.");
+        }
+
+        // 2. 리뷰 등록 (DAO 호출은 여기서만!)
+        reviewDao.insert(reviewDto);
+
+        // 3. 작성자 신뢰도 +1
+        String writer = reviewDto.getReviewWriter();
+        memberDao.updateReliability(writer, 1);
+    }
 
 	// 리뷰 삭제시 신뢰도 -1
 	public void deleteReview(Long reviewContents, Long reviewNo) {

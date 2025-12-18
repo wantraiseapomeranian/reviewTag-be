@@ -23,9 +23,12 @@ import com.kh.finalproject.dao.MemberWatchDao;
 import com.kh.finalproject.dto.MemberDto;
 import com.kh.finalproject.error.TargetNotfoundException;
 import com.kh.finalproject.error.UnauthorizationException;
+import com.kh.finalproject.service.PointService;
 import com.kh.finalproject.service.TokenService;
 import com.kh.finalproject.vo.MemberAddQuizListVO;
 import com.kh.finalproject.vo.MemberLoginResponseVO;
+import com.kh.finalproject.vo.MemberMypageResponseVO;
+import com.kh.finalproject.vo.MemberPointVO;
 import com.kh.finalproject.vo.MemberQuizListVO;
 import com.kh.finalproject.vo.MemberQuizRateVO;
 import com.kh.finalproject.vo.MemberRefreshVO;
@@ -54,7 +57,8 @@ public class MemberRestController {
 	private MemberWatchDao memberWatchDao;
 	@Autowired
 	private MemberQuizDao memberQuizDao;
-	
+	@Autowired
+	private PointService pointService;	
 	
 	/// 회원가입
 	@PostMapping("/")
@@ -81,10 +85,20 @@ public class MemberRestController {
 	}
 	
 	@GetMapping("/mypage/{loginId}")
-	public MemberDto selectOneToMypage(
-			@PathVariable String loginId){
-		return memberDao.selectOne(loginId);
-	}
+    public MemberMypageResponseVO getMypageData(@PathVariable String loginId) {
+        // 1. 기본 정보 조회
+        MemberDto memberDto = memberDao.selectOne(loginId);
+        if(memberDto == null) throw new TargetNotfoundException();
+
+        // 2. 치장 및 포인트 정보 조회 (작성하신 Service 활용)
+        MemberPointVO pointVO = pointService.getMyPointInfo(loginId);
+
+        // 3. 합쳐서 반환
+        return MemberMypageResponseVO.builder()
+                .member(memberDto)
+                .point(pointVO)
+                .build();
+    }
 	
 	
 	//회원정보수정 (전체수정)

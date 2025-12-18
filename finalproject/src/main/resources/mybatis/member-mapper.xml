@@ -216,35 +216,33 @@
     </select>
 
 
-    <select id="countPointAdminList" resultType="int">
-        SELECT COUNT(*) FROM member
-        WHERE 1=1
-        <if test="keyword != null and keyword != ''">
-            AND (member_id LIKE '%' || #{keyword} || '%' 
-                 OR member_nickname LIKE '%' || #{keyword} || '%')
-        </if>
-    </select>
+   <select id="countPointAdminList" resultType="int">
+    SELECT COUNT(*) FROM member
+    WHERE member_level != '관리자' <if test="keyword != null and keyword != ''">
+        AND (member_id LIKE '%' || #{keyword} || '%' 
+             OR member_nickname LIKE '%' || #{keyword} || '%')
+    </if>
+</select>
 
-    <select id="selectPointAdminList" resultType="com.kh.finalproject.dto.MemberDto">
-        SELECT * FROM (
-            SELECT TMP.*, ROWNUM RN FROM (
-                SELECT 
-                    member_id AS "memberId", 
-                    member_nickname AS "memberNickname", 
-                    member_point AS "memberPoint", 
-                    member_level AS "memberLevel", 
-                    to_char(member_join, 'YYYY-MM-DD') as "memberJoinDate"
-                FROM member
-                WHERE 1=1
-                <if test="keyword != null and keyword != ''">
-                    AND (member_id LIKE '%' || #{keyword} || '%' 
-                         OR member_nickname LIKE '%' || #{keyword} || '%')
-                </if>
-                ORDER BY member_join DESC
-            ) TMP
-        )
-        WHERE RN BETWEEN #{start} AND #{end}
-    </select>
+<select id="selectPointAdminList" resultType="MemberDto">
+    SELECT * FROM (
+        SELECT TMP.*, ROWNUM RN FROM (
+            SELECT 
+                member_id AS "memberId", 
+                member_nickname AS "memberNickname", 
+                member_point AS "memberPoint", 
+                member_level AS "memberLevel", 
+                to_char(member_join, 'YYYY-MM-DD') as "memberJoinDate"
+            FROM member
+            WHERE member_level != '관리자' <if test="keyword != null and keyword != ''">
+                AND (member_id LIKE '%' || #{keyword} || '%' 
+                     OR member_nickname LIKE '%' || #{keyword} || '%')
+            </if>
+            ORDER BY member_join DESC
+        ) TMP
+    )
+    WHERE RN BETWEEN #{start} AND #{end}
+</select>
 
     <update id="adminUpdatePoint">
         UPDATE member 

@@ -46,9 +46,10 @@ public class InventoryDao {
     public boolean delete(long inventoryNo) {
         return sqlSession.delete("inventory.delete", inventoryNo) > 0;
     }
+ // 특정 사용자의 인벤토리를 관리자 관점에서 조회
+    public List<InventoryDto> selectListByAdmin(String memberId) {
+        return sqlSession.selectList("inventory.selectListByAdmin", memberId);
+    }
 
-	public void unequipByType(String memberId, String type) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 }
