@@ -61,43 +61,41 @@ import com.kh.finalproject.vo.TokenVO;
 @RestController
 @RequestMapping("/admin")
 public class AdminRestController {
-	
+
 	@Autowired
 	private QuizService quizService;
-	
+
 	@Autowired
 	private AdminService adminService;
-	
+
 	@Autowired
 	private MemberDao memberDao;
-	
+
 	@Autowired
 	private TokenService tokenService;
-	
+
 	@Autowired
 	private MemberTokenDao memberTokenDao;
-    
+
 	@Autowired
 	private IconService iconService;
-	
-    @Autowired
-    private SqlSession sqlSession; // [추가] 포인트 관리 쿼리 실행을 위해 추가
-    
+
+	@Autowired
+	private SqlSession sqlSession; // [추가] 포인트 관리 쿼리 실행을 위해 추가
+
 	@Autowired
 	private DailyQuizDao dailyQuizDao;
 
 	@Autowired
 	private InventoryDao inventoryDao;
-	 @Autowired
-	 private PointItemStoreDao pointItemStoreDao; 
-	 @Autowired
-	 private MemberIconDao memberIconDao;
+	@Autowired
+	private PointItemStoreDao pointItemStoreDao;
+	@Autowired
+	private MemberIconDao memberIconDao;
 
-
-	
 	@Autowired
 	private BoardDao boardDao;
-	
+
 	@Autowired
 	private BoardReportDao boardReportDao;
 	
@@ -113,230 +111,208 @@ public class AdminRestController {
 			){
 		PageVO pageVO = new PageVO();
 		pageVO.setPage(page);
-		
-		if(type != "" && keyword != "") { // 검색일때
-			int totalCount =memberDao.countSearchMember(type, keyword);
+
+		if (type != "" && keyword != "") { // 검색일때
+			int totalCount = memberDao.countSearchMember(type, keyword);
 			pageVO.setTotalCount(totalCount);
 			List<MemberDto> list = memberDao.selectAdminMemberList(type, keyword, pageVO);
 			return new PageResponseVO<>(list, pageVO);
 		} else { // 검색이 아닐때
-			int totalCount =memberDao.countMember();
+			int totalCount = memberDao.countMember();
 			pageVO.setTotalCount(totalCount);
 			List<MemberDto> list = memberDao.selectListExceptAdmin(pageVO);
 			return new PageResponseVO<>(list, pageVO);
 		}
 	}
-	
-	
-	//회원 상세 조회
-	@GetMapping("/members/{memberId}")
-    public MemberDto getMemberDetail(
-            @PathVariable String memberId
-            ) {
-        MemberDto member = memberDao.selectOne(memberId);
-        
-        if(member == null)
-            throw new TargetNotfoundException();
-        
-        return member;
-    }
-	
-	//회원등급변경 (기존 기능)
-	@PatchMapping("/members/{memberId}/memberLevel")
-	public void changeLevel(
-        @PathVariable String memberId,
-        @RequestParam String memberLevel) {
-    
-        MemberDto memberDto = memberDao.selectOne(memberId);
-        if(memberDto == null) throw new TargetNotfoundException();
 
-        memberDto.setMemberLevel(memberLevel);
-        memberDao.updateMemberLevel(memberDto);
+	// 회원 상세 조회
+	@GetMapping("/members/{memberId}")
+	public MemberDto getMemberDetail(@PathVariable String memberId) {
+		MemberDto member = memberDao.selectOne(memberId);
+
+		if (member == null)
+			throw new TargetNotfoundException();
+
+		return member;
 	}
-	
-	//회원 강제 탈퇴
-	@DeleteMapping("/members/{memberId}")
-	public void delete(@PathVariable String memberId,
-			@RequestHeader("Authorization") String bearerToken) {
-		//계정 삭제
+
+	// 회원등급변경 (기존 기능)
+	@PatchMapping("/members/{memberId}/memberLevel")
+	public void changeLevel(@PathVariable String memberId, @RequestParam String memberLevel) {
+
 		MemberDto memberDto = memberDao.selectOne(memberId);
-		if(memberDto ==null) throw new TargetNotfoundException("존재하지 않는 회원입니다");
+		if (memberDto == null)
+			throw new TargetNotfoundException();
+
+		memberDto.setMemberLevel(memberLevel);
+		memberDao.updateMemberLevel(memberDto);
+	}
+
+	// 회원 강제 탈퇴
+	@DeleteMapping("/members/{memberId}")
+	public void delete(@PathVariable String memberId, @RequestHeader("Authorization") String bearerToken) {
+		// 계정 삭제
+		MemberDto memberDto = memberDao.selectOne(memberId);
+		if (memberDto == null)
+			throw new TargetNotfoundException("존재하지 않는 회원입니다");
 		memberDao.delete(memberId);
-		//토큰 삭제
+		// 토큰 삭제
 		TokenVO tokenVO = tokenService.parse(bearerToken);
 		memberTokenDao.deleteByTarget(tokenVO.getLoginId());
 	}
-	
-    // -------------------------------------------------------------
-    // [추가] 포인트 관리자 페이지 전용 기능
-    // -------------------------------------------------------------
 
-    // 1. 포인트 관리자용 회원 리스트 조회
+	// -------------------------------------------------------------
+	// [추가] 포인트 관리자 페이지 전용 기능
+	// -------------------------------------------------------------
+
+	// 1. 포인트 관리자용 회원 리스트 조회
 	@GetMapping("/point/list")
-    public Map<String, Object> getPointAdminMemberList(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
-            ) {
-        
-        // 1. 목록 조회
-        List<MemberDto> list = memberDao.selectPointAdminList(keyword, page, size);
-        
-        // 2. 전체 개수 조회
-        int totalCount = memberDao.countPointAdminList(keyword);
-        
-        // 3. 전체 페이지 수 계산
-        int totalPage = (totalCount + size - 1) / size;
+	public Map<String, Object> getPointAdminMemberList(@RequestParam(required = false) String keyword,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
 
-        // 4. 결과 반환
-        Map<String, Object> response = new HashMap<>();
-        response.put("list", list);
-        response.put("totalPage", totalPage);
-        response.put("totalCount", totalCount);
-        
-        return response;
-    }
+		// 1. 목록 조회
+		List<MemberDto> list = memberDao.selectPointAdminList(keyword, page, size);
 
-    // 2. 포인트 지급/차감
-    @PostMapping("/point/update")
-    public String updatePoint(@RequestBody Map<String, Object> body) {
-        String memberId = (String) body.get("memberId");
-        // 숫자 변환 안전장치
-        int amount = Integer.parseInt(String.valueOf(body.get("amount")));
+		// 2. 전체 개수 조회
+		int totalCount = memberDao.countPointAdminList(keyword);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("memberId", memberId);
-        params.put("amount", amount);
+		// 3. 전체 페이지 수 계산
+		int totalPage = (totalCount + size - 1) / size;
 
-        int result = sqlSession.update("member.adminUpdatePoint", params);
-        return result > 0 ? "success" : "fail";
-    }
+		// 4. 결과 반환
+		Map<String, Object> response = new HashMap<>();
+		response.put("list", list);
+		response.put("totalPage", totalPage);
+		response.put("totalCount", totalCount);
 
-    // 3. 회원 정보 수정 (닉네임, 등급) - 포인트 관리 페이지용
-    @PostMapping("/point/edit")
-    public String editMemberForPointAdmin(@RequestBody MemberDto memberDto) {
-        int result = sqlSession.update("member.adminUpdateMemberInfo", memberDto);
-        return result > 0 ? "success" : "fail";
-    }
-    // =============================================================
-    // 아이콘 관리자 기능 (목록, 등록, 수정, 삭제)
-     // =============================================================
-     // 1. 관리자용 아이콘 전체 목록 (페이징)
-    @GetMapping("/point/icon/list")
-    public IconPageVO adminIconList(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "ALL") String type) {
-        
-        return iconService.getIconList(page, type);
-    }
+		return response;
+	}
 
-    // 2. 아이콘 등록
-    @PostMapping("/point/icon/add")
-    public String addIcon(@RequestBody IconDto dto) {
-        try {
-            iconService.addIcon(dto);
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-    }
+	// 2. 포인트 지급/차감
+	@PostMapping("/point/update")
+	public String updatePoint(@RequestBody Map<String, Object> body) {
+		String memberId = (String) body.get("memberId");
+		// 숫자 변환 안전장치
+		int amount = Integer.parseInt(String.valueOf(body.get("amount")));
 
-    // 3. 아이콘 수정
-    @PostMapping("/point/icon/edit") // ★ 맨 앞에 슬래시(/) 추가했습니다.
-    public String editIcon(@RequestBody IconDto dto) {
-        try {
-            iconService.editIcon(dto);
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-    }
+		Map<String, Object> params = new HashMap<>();
+		params.put("memberId", memberId);
+		params.put("amount", amount);
 
-    // 4. 아이콘 삭제
-    @DeleteMapping("/point/icon/delete/{iconId}")
-    public String deleteIcon(@PathVariable int iconId) {
-        try {
-            iconService.removeIcon(iconId);
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-    }
-    // -------------------------------------------------------------
+		int result = sqlSession.update("member.adminUpdatePoint", params);
+		return result > 0 ? "success" : "fail";
+	}
 
-    // -------------------------------------------------------------
+	// 3. 회원 정보 수정 (닉네임, 등급) - 포인트 관리 페이지용
+	@PostMapping("/point/edit")
+	public String editMemberForPointAdmin(@RequestBody MemberDto memberDto) {
+		int result = sqlSession.update("member.adminUpdateMemberInfo", memberDto);
+		return result > 0 ? "success" : "fail";
+	}
 
-  	//퀴즈 신고 관리 페이지
-  	@GetMapping("/quizzes/reports")
-  	public List<QuizReportStatsVO> getReportList(
-  			@RequestParam String status,
-  			@RequestAttribute TokenVO tokenVO,
-  			@RequestParam(defaultValue = "1") Integer page
-  			) {
-      	int size = 2; // 한 페이지당 보여줄 개수 
-          
-          // Oracle 페이징 계산 (1페이지: 1~12, 2페이지: 13~24 ...)
-          int end = page * size;
-          int start = end - (size - 1);
-          
-          Map<String, Object> params = new HashMap<>();
-          params.put("start", start);
-          params.put("end", end);
-          
-  		String loginLevel = tokenVO.getLoginLevel();
-  		params.put("loginLevel", loginLevel);
-  		params.put("status", status);
-  		 List<QuizReportStatsVO> list = adminService.getReportedQuizList(params);
-  		return list;
-  	}
+	// =============================================================
+	// 아이콘 관리자 기능 (목록, 등록, 수정, 삭제)
+	// =============================================================
+	// 1. 관리자용 아이콘 전체 목록 (페이징)
+	@GetMapping("/point/icon/list")
+	public IconPageVO adminIconList(@RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "ALL") String type) {
 
-  	//퀴즈 신고 상세 내역 페이지
-  	@GetMapping("/quizzes/{quizId}/reports")
-  	public List<QuizReportDetailVO> getReportDetail(
-  			@PathVariable int quizId,
-  			@RequestAttribute TokenVO tokenVO
-  			) {
-  		
-  		String loginLevel = tokenVO.getLoginLevel();
-  		
-          return adminService.getReportDetails(loginLevel, quizId);
-      }
-  	
-  	//퀴즈 삭제
-  	@DeleteMapping("/quizzes/{quizId}")
-      public boolean deleteQuiz(
-      		@PathVariable long quizId,
-              @RequestAttribute TokenVO tokenVO
-              ) {
-          String loginId = tokenVO.getLoginId();
-          String loginLevel = tokenVO.getLoginLevel();
-  		
-          return quizService.deleteQuiz(quizId, loginId, loginLevel);
-      }
-  	
-  	//퀴즈 상태 변경
-  	@PatchMapping("/quizzes/{quizId}/status/{status}")
-  	public boolean changeStatus(
-  			@PathVariable long quizId,
-  			@PathVariable String status,
-  			@RequestAttribute TokenVO tokenVO
-  			) {
-  		
-  		String loginId = tokenVO.getLoginId();
-  		String loginLevel = tokenVO.getLoginLevel();
-  		
-  		//퀴즈 상태 변경
-  		QuizDto quizDto = QuizDto.builder()
-  					.quizId(quizId)
-  					.quizStatus(status)
-  				.build();
-  		
-  		return quizService.changeQuizStatus(quizDto, loginId, loginLevel);
-  	}	
-  	
+		return iconService.getIconList(page, type);
+	}
+
+	// 2. 아이콘 등록
+	@PostMapping("/point/icon/add")
+	public String addIcon(@RequestBody IconDto dto) {
+		try {
+			iconService.addIcon(dto);
+			return "success";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "fail";
+		}
+	}
+
+	// 3. 아이콘 수정
+	@PostMapping("/point/icon/edit") // ★ 맨 앞에 슬래시(/) 추가했습니다.
+	public String editIcon(@RequestBody IconDto dto) {
+		try {
+			iconService.editIcon(dto);
+			return "success";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "fail";
+		}
+	}
+
+	// 4. 아이콘 삭제
+	@DeleteMapping("/point/icon/delete/{iconId}")
+	public String deleteIcon(@PathVariable int iconId) {
+		try {
+			iconService.removeIcon(iconId);
+			return "success";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "fail";
+		}
+	}
+	// -------------------------------------------------------------
+
+	// -------------------------------------------------------------
+
+	// 퀴즈 신고 관리 페이지
+	@GetMapping("/quizzes/reports")
+	public List<QuizReportStatsVO> getReportList(@RequestParam String status, @RequestAttribute TokenVO tokenVO,
+			@RequestParam(defaultValue = "1") Integer page) {
+		int size = 2; // 한 페이지당 보여줄 개수
+
+		// Oracle 페이징 계산 (1페이지: 1~12, 2페이지: 13~24 ...)
+		int end = page * size;
+		int start = end - (size - 1);
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("start", start);
+		params.put("end", end);
+
+		String loginLevel = tokenVO.getLoginLevel();
+		params.put("loginLevel", loginLevel);
+		params.put("status", status);
+		List<QuizReportStatsVO> list = adminService.getReportedQuizList(params);
+		return list;
+	}
+
+	// 퀴즈 신고 상세 내역 페이지
+	@GetMapping("/quizzes/{quizId}/reports")
+	public List<QuizReportDetailVO> getReportDetail(@PathVariable int quizId, @RequestAttribute TokenVO tokenVO) {
+
+		String loginLevel = tokenVO.getLoginLevel();
+
+		return adminService.getReportDetails(loginLevel, quizId);
+	}
+
+	// 퀴즈 삭제ReviewReportRestController
+	@DeleteMapping("/quizzes/{quizId}")
+	public boolean deleteQuiz(@PathVariable long quizId, @RequestAttribute TokenVO tokenVO) {
+		String loginId = tokenVO.getLoginId();
+		String loginLevel = tokenVO.getLoginLevel();
+
+		return quizService.deleteQuiz(quizId, loginId, loginLevel);
+	}
+
+	// 퀴즈 상태 변경
+	@PatchMapping("/quizzes/{quizId}/status/{status}")
+	public boolean changeStatus(@PathVariable long quizId, @PathVariable String status,
+			@RequestAttribute TokenVO tokenVO) {
+
+		String loginId = tokenVO.getLoginId();
+		String loginLevel = tokenVO.getLoginLevel();
+
+		// 퀴즈 상태 변경
+		QuizDto quizDto = QuizDto.builder().quizId(quizId).quizStatus(status).build();
+
+		return quizService.changeQuizStatus(quizDto, loginId, loginLevel);
+	}
+
 	@GetMapping("/dailyquiz/list")
     public Map<String, Object> list(
             @RequestParam(defaultValue = "1") int page,
@@ -454,7 +430,7 @@ public class AdminRestController {
       }
   	
   	
-  
+  	
         // 1. 지급 가능한 전체 아이템 목록 조회 (상점 데이터)
         @GetMapping("/inventory/item-list")
         public List<PointItemStoreDto> getItemList() {
@@ -511,4 +487,131 @@ public class AdminRestController {
     }
 
 
+	// 2. 등록 (주소: /admin/dailyquiz/)
+	@PostMapping("/dailyquiz/")
+	public String insert(@RequestBody DailyQuizVO vo) {
+		dailyQuizDao.insert(vo);
+		return "success";
+	}
 
+	// 3. 수정 (주소: /admin/dailyquiz/)
+	@PutMapping("/dailyquiz/")
+	public String update(@RequestBody DailyQuizVO vo) {
+		boolean result = dailyQuizDao.update(vo);
+		return result ? "success" : "fail";
+	}
+
+	// 4. 삭제 (주소: /admin/dailyquiz/{quizNo})
+	@DeleteMapping("/dailyquiz/{quizNo}")
+	public String delete(@PathVariable int quizNo) {
+		boolean result = dailyQuizDao.delete(quizNo);
+		return result ? "success" : "fail";
+	}
+
+	@GetMapping("/inventory/{memberId}")
+	public List<InventoryDto> getUserInventory(@PathVariable String memberId) {
+		return inventoryDao.selectListByAdmin(memberId);
+	}
+
+	@DeleteMapping("/inventory/{inventoryNo}")
+	public ResponseEntity<String> recallItem(@PathVariable long inventoryNo) {
+		boolean isDeleted = inventoryDao.delete(inventoryNo);
+
+		if (isDeleted) {
+			return ResponseEntity.ok("Item successfully recalled.");
+		} else {
+			return ResponseEntity.status(404).body("Item not found or recall failed.");
+		}
+	}
+	// ------------------------------------------------------------
+
+	// 게시판 신고 관리 페이지
+	@GetMapping("/board/reports")
+	public List<BoardReportStatsVO> getBReportList(@RequestParam String status, @RequestAttribute TokenVO tokenVO,
+			@RequestParam(defaultValue = "1") Integer page) {
+		int size = 2; // 한 페이지당 보여줄 개수
+
+		// Oracle 페이징 계산 (1페이지: 1~12, 2페이지: 13~24 ...)
+		int end = page * size;
+		int start = end - (size - 1);
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("start", start);
+		params.put("end", end);
+
+		String loginLevel = tokenVO.getLoginLevel();
+		params.put("loginLevel", loginLevel);
+		params.put("status", status);
+		List<BoardReportStatsVO> list = adminService.getReportedBoardList(params);
+		return list;
+	}
+
+	// 게시글 신고 상세 내역 페이지
+	@GetMapping("/board/{boardNo}/reports")
+	public List<BoardReportDetailVO> getReportBDetail(@PathVariable int boardNo, @RequestAttribute TokenVO tokenVO) {
+
+		String loginLevel = tokenVO.getLoginLevel();
+
+		return adminService.getReportBDetails(loginLevel, boardNo);
+	}
+
+	// 게시글 삭제
+	@DeleteMapping("/board/{boardNo}")
+	public boolean deleteBoard(@PathVariable int boardNo, @RequestAttribute TokenVO tokenVO) {
+		String loginId = tokenVO.getLoginId();
+		String loginLevel = tokenVO.getLoginLevel();
+
+		if (!"관리자".equals(loginLevel) && loginId == null)
+			throw new NeedPermissionException();
+
+		return boardDao.delete(boardNo);
+	}
+
+	// 1. 지급 가능한 전체 아이템 목록 조회 (상점 데이터)
+	@GetMapping("/inventory/item-list")
+	public List<PointItemStoreDto> getItemList() {
+		return pointItemStoreDao.selectList();
+	}
+
+	// 2. 특정 사용자에게 아이템 지급
+	@PostMapping("/inventory/{memberId}/{itemNo}")
+	public ResponseEntity<Void> grantItem(@PathVariable String memberId, @PathVariable long itemNo) {
+		InventoryDto dto = new InventoryDto();
+		dto.setInventoryMemberId(memberId);
+		dto.setInventoryItemNo(itemNo);
+		inventoryDao.insert(dto); //
+		return ResponseEntity.ok().build();
+	}
+
+	// 특정 유저의 아이콘 목록 조회
+	@GetMapping("/icon/{memberId}")
+	public List<MemberIconDto> getUserIcons(@PathVariable String memberId) {
+		List<MemberIconDto> list = memberIconDao.selectUserIcon(memberId);
+		return list == null ? new ArrayList<>() : list;
+	}
+
+	@GetMapping("/icon/list")
+	public List<IconDto> getIconList() {
+		return memberIconDao.selectIconList();
+	}
+
+	@PostMapping("/icon/{memberId}/{iconId}")
+	public ResponseEntity<String> grantIcon(@PathVariable String memberId, @PathVariable int iconId) {
+
+		int count = memberIconDao.checkUserHasIcon(memberId, iconId);
+		if (count > 0) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 보유 중");
+		}
+
+		memberIconDao.insertMemberIcon(memberId, iconId);
+		return ResponseEntity.ok("지급 완료");
+	}
+
+	@DeleteMapping("/icon/{memberIconId}")
+	public ResponseEntity<Void> recallIcon(@PathVariable long memberIconId) {
+
+		int result = memberIconDao.deleteMemberIcon(memberIconId);
+		return result > 0 ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+	}
+
+}

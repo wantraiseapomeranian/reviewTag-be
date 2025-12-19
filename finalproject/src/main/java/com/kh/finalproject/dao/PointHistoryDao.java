@@ -61,4 +61,11 @@ public class PointHistoryDao {
         return sqlSession.selectList("pointhistory.selectListByMemberIdPaging", params);
     }
 
+    public int countTodayPurchase(String memberId, String itemName) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("memberId", memberId);
+        params.put("itemName", itemName);
+        return sqlSession.selectOne("pointhistory.countTodayPurchase", params);
+    }
+
 }

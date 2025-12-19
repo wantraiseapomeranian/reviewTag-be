@@ -107,6 +107,7 @@ public class MemberRestController {
     }
 	
 	
+	
 	//회원정보수정 (전체수정)
 	@PutMapping("/{memberId}")
 	public void edit(

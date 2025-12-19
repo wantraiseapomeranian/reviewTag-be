@@ -22,19 +22,20 @@ import com.kh.finalproject.vo.DailyQuizVO;
 public class DailyQuestService {
 
     @Autowired private DailyQuestProperties questProps; 
-    @Autowired private PointGetQuestDao questDao;       // 퀘스트 로그 관리
+    @Autowired private PointGetQuestDao questDao;       
     
-    // [변경 1] MemberDao 제거 -> PointService, DailyQuizDao 추가
     @Lazy
+
     @Autowired private PointService pointService;       // 포인트 지급 및 이력 관리
     @Autowired private DailyQuizDao quizDao;            // 퀴즈 DB 접근 (SqlSession 사용)
+
 
 
     private String getTodayStr() {
         return LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
     }
 
-    // 1. 퀘스트 목록 조회 (기존 로직 유지)
+    // 1. 퀘스트 목록 조회
     public List<DailyQuestVO> getQuestList(String memberId) {
         String today = getTodayStr();
         List<Map<String, Object>> logs = questDao.selectTodayLogs(memberId, today);
@@ -59,46 +60,33 @@ public class DailyQuestService {
         return result;
     }
 
-    // [변경 3] 랜덤 퀴즈 추출 (DB 연동 + 중복 방지)
+    // 2. 랜덤 퀴즈 추출
     public DailyQuizVO getRandomQuiz(String memberId) {
-        // (1) 오늘 이미 퀴즈 퀘스트를 완료했는지 확인 (기존 로그 활용)
         List<Map<String, Object>> logs = questDao.selectTodayLogs(memberId, getTodayStr());
         boolean alreadySolved = logs.stream().anyMatch(m -> "QUIZ".equals(m.get("type")));
 
-        // (2) 이미 풀었다면 null 반환 (프론트에서 '내일 다시 도전하세요' 처리)
-        if (alreadySolved) {
-            return null; 
-        }
-
-        // (3) 안 풀었다면 DAO를 통해 DB에서 랜덤 문제 1개 가져오기
+        if (alreadySolved) return null; 
         return quizDao.getRandomQuiz();
     }
 
-    // [변경 4] 정답 검증 (보안 강화: 정답을 DB에서 직접 조회)
-    // 파라미터 변경: correctAnswer(정답 문자열) 대신 quizNo(문제 번호)를 받습니다.
+    // 3. 정답 검증
     @Transactional
     public boolean checkQuizAndProgress(String memberId, int quizNo, String userAnswer) {
         if (userAnswer == null) return false;
-
-        // (1) DB에서 해당 문제의 '진짜 정답' 가져오기
         String correctAnswer = quizDao.getAnswer(quizNo); 
-        
         if (correctAnswer == null) return false;
 
-        // (2) 정답 비교 (공백 제거, 소문자 변환 등 유연하게 처리)
         String cleanUser = userAnswer.replace(" ", "").toLowerCase();
         String cleanCorrect = correctAnswer.replace(" ", "").toLowerCase();
 
         if (cleanUser.contains(cleanCorrect)) {
-            // (3) 정답이면 퀘스트 진행도 상승 (이제 '완료' 상태가 됨)
             this.questProgress(memberId, "QUIZ");
             return true;
         }
-        
         return false;
     }
 
-    // 4. 퀘스트 진행도 상승 (공용)
+    // 4. 퀘스트 진행도 상승
     @Transactional
     public void questProgress(String memberId, String type) {
         boolean isValid = questProps.getList().stream().anyMatch(q -> q.getType().equals(type));
@@ -107,7 +95,7 @@ public class DailyQuestService {
         }
     }
 
-    // [변경 5] 보상 수령 (PointService 적용)
+    // [수정 포인트] 5. 보상 수령
     @Transactional
     public int claimReward(String memberId, String type) {
         DailyQuestProperties.QuestDetail targetQuest = questProps.getList().stream()
@@ -122,23 +110,19 @@ public class DailyQuestService {
         if (current < targetQuest.getTarget()) throw new RuntimeException("목표 미달성");
         if ("Y".equals(myLog.get("rewardYn"))) throw new RuntimeException("이미 수령");
 
-        // 보상 수령 상태 업데이트
         if (questDao.updateRewardStatus(memberId, type, getTodayStr()) > 0) {
-            
-            // [핵심] PointService를 통해 포인트 지급 및 'GET' 이력 저장
+            // 사유(Reason) 추가: 예) "일일 퀘스트 보상: 오늘의 영화 퀴즈"
             pointService.addPoint(
                 memberId, 
                 targetQuest.getReward(), 
                 "GET",
                 "일일 퀘스트 보상: " + targetQuest.getTitle() 
             );
-            
             return targetQuest.getReward();
         }
         return 0;
     }
 
-    // --- [Helper 메소드] ---
     private String getIconByType(String type) {
         switch(type) {
             case "REVIEW": return "✍️"; case "QUIZ": return "🧠";

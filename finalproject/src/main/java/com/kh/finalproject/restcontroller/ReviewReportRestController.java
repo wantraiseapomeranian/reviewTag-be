@@ -66,7 +66,7 @@ public class ReviewReportRestController {
 	}
 	
 	//신고 삭제 (관리자용)
-	@DeleteMapping("/{quizReportId}")
+	@DeleteMapping("/{reviewReportId}")
 	public boolean deleteReport(
 			@RequestAttribute TokenVO tokenVO,
 			@PathVariable long reviewReportId) {
@@ -78,11 +78,12 @@ public class ReviewReportRestController {
 	}
 	
 	// 신고 유형별 횟수
-	@GetMapping("/stats/{quizId}")
+	@GetMapping("/stats/{reviewReportId}")
 	public List<Map<String, Object>> count(
 			@RequestAttribute TokenVO tokenVO,
 			@PathVariable long reviewReportReviewId){
 		return reviewReportDao.countByType(reviewReportReviewId);
 	}
+
 	
 }

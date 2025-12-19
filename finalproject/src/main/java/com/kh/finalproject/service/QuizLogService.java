@@ -126,8 +126,3 @@ public class QuizLogService {
 		return quizLogDao.selectList(quizLogQuizId);
 	}
 }
-
-
-
-
-

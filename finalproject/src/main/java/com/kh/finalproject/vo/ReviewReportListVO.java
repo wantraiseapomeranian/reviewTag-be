@@ -23,4 +23,7 @@ public class ReviewReportListVO {
 	private String reviewText; // 신고된 리뷰 내용
 	private String contentsTitle; // 신고된 컨텐츠 제목
 	private Long reviewReportCount;
+	
+	private String memberNickname; // 신고된 리뷰자 닉네임 (+추가)
+
 }

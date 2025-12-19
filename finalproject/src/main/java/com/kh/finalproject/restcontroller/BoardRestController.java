@@ -75,7 +75,7 @@ public class BoardRestController {
 
 		int boardNo =  boardDao.insert(boardDto);
 		int getPoint = 10;
-		pointService.addAttendancePoint(loginId, getPoint, "GET");
+		pointService.addPoint(loginId, getPoint, "GET","게시글작성");
 		if(boardDto.getAttachmentNoList() != null) {
 			for(int attachmentNo : boardDto.getAttachmentNoList()) {
 				boardDao.connect(boardNo, attachmentNo);
@@ -199,10 +199,10 @@ public class BoardRestController {
 		int losePoint = -10; // 삭제로 잃는 포인트
 		int point = memberDto.getMemberPoint();  
 		if(point >= 10) {
-			pointService.addAttendancePoint(loginId, losePoint, "USE");
+			pointService.addPoint(loginId, losePoint,"GET","게시글 삭제");
 		}
 		else {
-			pointService.addAttendancePoint(loginId, -point, "USE");
+			pointService.addPoint(loginId, -point, "USE", "게시글삭제");
 		}
 
 		Document document = Jsoup.parse(boardDto.getBoardText());

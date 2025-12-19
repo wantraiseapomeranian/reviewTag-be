@@ -5,7 +5,6 @@
   
 <mapper namespace="pointitemstore">
 
-
     <insert id="insert">
         INSERT INTO POINT_ITEM_STORE(  
             point_item_no, 
@@ -16,7 +15,8 @@
             point_item_stock,
             point_item_src,
             point_item_req_level,
-            POINT_ITEM_IS_LIMITED_PURCHASE  )
+            POINT_ITEM_IS_LIMITED_PURCHASE,
+            POINT_ITEM_DAILY_LIMIT  )
         VALUES(
             seq_point_item.nextval, 
             #{pointItemName}, 
@@ -26,7 +26,8 @@
             #{pointItemStock},
             #{pointItemSrc},
             #{pointItemReqLevel},
-            #{pointItemIsLimitedPurchase}   )
+            #{pointItemIsLimitedPurchase},
+            #{pointItemDailyLimit}  )
     </insert>
   
     <update id="update">
@@ -39,8 +40,8 @@
             point_item_stock = #{pointItemStock},
             point_item_src = #{pointItemSrc},
             point_item_req_level = #{pointItemReqLevel},
-            POINT_ITEM_IS_LIMITED_PURCHASE = #{pointItemIsLimitedPurchase} 
-        WHERE
+            POINT_ITEM_IS_LIMITED_PURCHASE = #{pointItemIsLimitedPurchase},
+            POINT_ITEM_DAILY_LIMIT = #{pointItemDailyLimit} WHERE
             point_item_no = #{pointItemNo}
     </update>
   
@@ -55,8 +56,8 @@
             point_item_src as pointItemSrc,
             point_item_reg_date as pointItemRegDate,
             point_item_req_level as pointItemReqLevel,
-            POINT_ITEM_IS_LIMITED_PURCHASE as pointItemIsLimitedPurchase 
-        FROM POINT_ITEM_STORE
+            POINT_ITEM_IS_LIMITED_PURCHASE as pointItemIsLimitedPurchase,
+            POINT_ITEM_DAILY_LIMIT as pointItemDailyLimit FROM POINT_ITEM_STORE
         ORDER BY point_item_no DESC
     </select>
   
@@ -71,8 +72,8 @@
             point_item_src as pointItemSrc,
             point_item_reg_date as pointItemRegDate,
             point_item_req_level as pointItemReqLevel,
-            POINT_ITEM_IS_LIMITED_PURCHASE as pointItemIsLimitedPurchase 
-        FROM POINT_ITEM_STORE
+            POINT_ITEM_IS_LIMITED_PURCHASE as pointItemIsLimitedPurchase,
+            POINT_ITEM_DAILY_LIMIT as pointItemDailyLimit FROM POINT_ITEM_STORE
         WHERE point_item_no = #{itemNo}
     </select>
     

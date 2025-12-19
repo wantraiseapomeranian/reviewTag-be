@@ -2,17 +2,16 @@ package com.kh.finalproject.restcontroller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.kh.finalproject.dao.InventoryDao;
-import com.kh.finalproject.dao.MemberDao;
-import com.kh.finalproject.dao.PointHistoryDao;
-import com.kh.finalproject.dao.PointItemStoreDao;
 import com.kh.finalproject.dto.InventoryDto;
 import com.kh.finalproject.dto.PointItemStoreDto;
 import com.kh.finalproject.dto.PointWishlistDto;
 import com.kh.finalproject.service.PointService;
+import com.kh.finalproject.dao.PointItemStoreDao;
+import com.kh.finalproject.dao.InventoryDao;
 import com.kh.finalproject.vo.*;
 
 @RestController
@@ -23,233 +22,162 @@ public class PointStoreRestController {
     @Autowired private PointService pointService;
     @Autowired private PointItemStoreDao pointItemDao;
     @Autowired private InventoryDao inventoryDao;
-    @Autowired private MemberDao memberDao;
-    @Autowired private PointHistoryDao pointHistoryDao;
 
     // =========================================================
-    // [1] 상점 (상품 조회, 구매, 선물)
+    // [공통 예외 처리] 컨트롤러 내 에러 발생 시 자동 처리
+    // =========================================================
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    // =========================================================
+    // [1] 상점 기능
     // =========================================================
 
-    // 1. 상품 목록 조회
+    // 1. 전체 상품 조회
     @GetMapping("")
     public List<PointItemStoreDto> list() { 
         return pointItemDao.selectList(); 
     }
 
-    // 2. 구매 (POST /point/main/store/buy)
+    // 2. 상품 구매
     @PostMapping("/buy")
-    public String buy(
-            @RequestAttribute(value="loginId", required=false) String loginId,
+    public ResponseEntity<String> buy(
+            @RequestAttribute(required = false) String loginId,
             @RequestBody PointBuyVO vo) {
         
-        if(loginId == null) return "fail:로그인 정보 없음";
-        try {
-            pointService.purchaseItem(loginId, vo.getBuyItemNo());
-            return "success";
-        } catch (Exception e) { 
-            e.printStackTrace(); 
-            return "fail:" + e.getMessage(); // 에러 메시지 전달
-        }
+        if(loginId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        
+        pointService.purchaseItem(loginId, vo.getBuyItemNo());
+        return ResponseEntity.ok("success");
     }
 
-    // 3. 선물 (POST /point/main/store/gift)
+    // 3. 선물하기
     @PostMapping("/gift")
-    public String gift(
-            @RequestAttribute(value="loginId", required=false) String loginId,
+    public ResponseEntity<String> gift(
+            @RequestAttribute(required = false) String loginId,
             @RequestBody PointGiftVO vo) {
         
-        if(loginId == null) return "fail:로그인 정보 없음";
-        try {
-            pointService.giftItem(loginId, vo.getTargetId(), vo.getItemNo());
-            return "success";
-        } catch (Exception e) { 
-            e.printStackTrace(); 
-            return "fail:" + e.getMessage();
-        }
+        if(loginId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        
+        pointService.giftItem(loginId, vo.getTargetId(), vo.getItemNo());
+        return ResponseEntity.ok("success");
     }
 
     // =========================================================
-    // [2] 인벤토리 (보관함 조회, 사용, 환불, 버리기)
+    // [2] 인벤토리 및 아이템 관리
     // =========================================================
 
-    // 4. 내 보관함 조회 (GET /point/main/store/inventory/my)
+    // 4. 내 보관함 조회
     @GetMapping("/inventory/my")
-    public List<InventoryDto> myInventory(
-            @RequestAttribute(value="loginId", required=false) String loginId) {
+    public List<InventoryDto> myInventory(@RequestAttribute(required = false) String loginId) {
         if(loginId == null) return List.of();
         return inventoryDao.selectListByMemberId(loginId);
     }
 
-    // 5. 아이템 사용 (POST /point/main/store/inventory/use)
+    // 5. 아이템 사용 (닉네임 변경 등)
     @PostMapping("/inventory/use")
-    public String useItem(
-            @RequestAttribute(value="loginId", required=false) String loginId,
+    public ResponseEntity<String> useItem(
+            @RequestAttribute(required = false) String loginId,
             @RequestBody PointUseVO vo) {
-        if(loginId == null) return "fail:로그인 필요";
-        try {
-            pointService.useItem(loginId, vo.getInventoryNo(), vo.getExtraValue());
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail:" + e.getMessage();
-        }
+        if(loginId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 필요");
+        
+        pointService.useItem(loginId, vo.getInventoryNo(), vo.getExtraValue());
+        return ResponseEntity.ok("success");
     }
     
-    // 6. 구매 취소/환불 (POST /point/main/store/cancel)
+    // 6. 구매 취소/환불
     @PostMapping("/cancel")
-    public String cancel(
-            @RequestAttribute(value="loginId", required=false) String loginId,
+    public ResponseEntity<String> cancel(
+            @RequestAttribute(required = false) String loginId,
             @RequestBody PointCancelVO vo) {
-        if(loginId == null) return "fail:로그인 정보 없음";
-        try {
-            pointService.cancelItem(loginId, vo.getInventoryNo());
-            return "success";
-        } catch (Exception e) { 
-            e.printStackTrace(); 
-            return "fail:" + e.getMessage(); 
-        }
+        if(loginId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 필요");
+        
+        pointService.cancelItem(loginId, vo.getInventoryNo());
+        return ResponseEntity.ok("success");
     }
     
-    // 7. 아이템 삭제/버리기 (POST /point/main/store/inventory/delete)
+    // 7. 아이템 버리기 (영구 삭제)
     @PostMapping("/inventory/delete")
-    public String discardItem(
-            @RequestAttribute(value="loginId", required=false) String loginId,
+    public ResponseEntity<String> discardItem(
+            @RequestAttribute(required = false) String loginId,
             @RequestBody PointCancelVO vo) {
-        if(loginId == null) return "fail";
-        try {
-            pointService.discardItem(loginId, vo.getInventoryNo());
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
+        if(loginId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("fail");
+        
+        pointService.discardItem(loginId, vo.getInventoryNo());
+        return ResponseEntity.ok("success");
+    }
+
+    // 8. 아이템 장착 해제
+    @PostMapping("/inventory/unequip")
+    public ResponseEntity<String> unequipItem(
+            @RequestAttribute(required = false) String loginId,
+            @RequestBody PointUseVO vo) {
+        if(loginId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 필요");
+        
+        pointService.unequipItem(loginId, vo.getInventoryNo());
+        return ResponseEntity.ok("success");
     }
 
     // =========================================================
-    // [3] 위시리스트 (찜)
+    // [3] 위시리스트
     // =========================================================
 
-    // 8. 찜 토글 (추가/삭제 자동) (POST /point/main/store/wish/toggle)
     @PostMapping("/wish/toggle")
-    public boolean toggleWish(
-            @RequestAttribute(value="loginId", required=false) String loginId,
-            @RequestBody PointItemWishVO vo) {
+    public boolean toggleWish(@RequestAttribute(required = false) String loginId, @RequestBody PointItemWishVO vo) {
         if(loginId == null) return false;
         return pointService.toggleWish(loginId, vo.getItemNo());
     }
 
-    // 9. 내가 찜한 아이템 번호만 조회 (GET /point/main/store/wish/check)
     @GetMapping("/wish/check")
-    public List<Long> myWishItemNos(
-            @RequestAttribute(value="loginId", required=false) String loginId) {
+    public List<Long> myWishItemNos(@RequestAttribute(required = false) String loginId) {
         if(loginId == null) return List.of();
         return pointService.getMyWishItemNos(loginId);
     }
 
-    // 10. 내 찜 목록 상세 조회 (GET /point/main/store/wish/my)
     @GetMapping("/wish/my")
-    public List<PointWishlistDto> myWishlist(
-            @RequestAttribute(value="loginId", required=false) String loginId) {
+    public List<PointWishlistDto> myWishlist(@RequestAttribute(required = false) String loginId) {
         if(loginId == null) return List.of();
         return pointService.getMyWishlist(loginId);
     }
-    
-    // 11. 찜 삭제 (POST /point/main/store/wish/delete)
-    @PostMapping("/wish/delete")
-    public String deleteWish(
-            @RequestAttribute(value="loginId", required=false) String loginId,
-            @RequestBody PointItemWishVO vo) {
-        if(loginId == null) return "fail:로그인 정보 없음";
-        try {
-            pointService.deleteWish(loginId, vo.getItemNo());
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-    }
 
     // =========================================================
-    // [4] 기타 기능 (룰렛, 내정보, 관리자)
+    // [4] 부가 기능
     // =========================================================
 
-    // 12. 룰렛 돌리기 (POST /point/main/store/roulette)
     @PostMapping("/roulette")
-    public ResponseEntity<Integer> startRoulette(
-            @RequestAttribute(value="loginId", required=false) String loginId) {
-        
-        if(loginId == null) throw new RuntimeException("로그인이 필요합니다.");
-
-        // 서비스가 0~5 사이 인덱스를 리턴
-        int resultIndex = pointService.playRoulette(loginId);
-        
-        return ResponseEntity.ok(resultIndex); 
+    public ResponseEntity<Integer> startRoulette(@RequestAttribute(required = false) String loginId) {
+        if(loginId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok(pointService.playRoulette(loginId));
     }
-    // 13. 내 포인트 및 장착 정보 조회 (GET /point/main/store/my-info)
+
     @GetMapping("/my-info")
-    public MemberPointVO getMyInfo(
-            @RequestAttribute(value="loginId", required=false) String loginId) {
+    public MemberPointVO getMyInfo(@RequestAttribute(required = false) String loginId) {
         if (loginId == null) return null; 
         return pointService.getMyPointInfo(loginId);
     }
     
-    // 14. [관리자] 상품 등록
+    // =========================================================
+    // [5] 관리자 기능
+    // =========================================================
+
     @PostMapping("/item/add")
-    public String addItem(
-            @RequestAttribute(value="loginId", required=false) String loginId,
-            @RequestBody PointItemStoreDto itemDto) {
-        if(loginId == null) return "fail";
-        try {
-            pointService.addItem(loginId, itemDto);
-            return "success";
-        } catch (Exception e) { 
-            e.printStackTrace(); 
-            return "fail"; 
-        }
+    public ResponseEntity<String> addItem(@RequestAttribute(required = false) String loginId, @RequestBody PointItemStoreDto dto) {
+        pointService.addItem(loginId, dto);
+        return ResponseEntity.ok("success");
     }
     
-    // 15. [관리자] 상품 수정
     @PostMapping("/item/edit")
-    public String editItem(
-            @RequestAttribute(value="loginId", required=false) String loginId,
-            @RequestBody PointItemStoreDto itemDto) {
-        if(loginId == null) return "fail";
-        try {
-            pointService.editItem(loginId, itemDto);
-            return "success";
-        } catch (Exception e) { 
-            e.printStackTrace(); 
-            return "fail"; 
-        }
+    public ResponseEntity<String> editItem(@RequestAttribute(required = false) String loginId, @RequestBody PointItemStoreDto dto) {
+        pointService.editItem(loginId, dto);
+        return ResponseEntity.ok("success");
     }
     
-    // 16. [관리자] 상품 삭제
     @PostMapping("/item/delete")
-    public String deleteItem(
-            @RequestAttribute(value="loginId", required=false) String loginId,
-            @RequestBody PointItemStoreDto itemDto) {
-        if(loginId == null) return "fail";
-        try {
-            pointService.deleteItem(loginId, itemDto.getPointItemNo());
-            return "success";
-        } catch (Exception e) { 
-            e.printStackTrace(); 
-            return "fail"; 
-        }
-    }
-    //장착해제
-    @PostMapping("/inventory/unequip")
-    public String unequipItem(
-            @RequestAttribute(value="loginId", required=false) String loginId,
-            @RequestBody PointUseVO vo) { // inventoryNo를 받기 위해 PointUseVO 사용
-        if(loginId == null) return "fail:로그인 필요";
-        try {
-            // 서비스에서 장착 해제 로직 실행
-            pointService.unequipItem(loginId, vo.getInventoryNo());
-            return "success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail:" + e.getMessage();
-        }
+    public ResponseEntity<String> deleteItem(@RequestAttribute(required = false) String loginId, @RequestBody PointItemStoreDto dto) {
+        pointService.deleteItem(loginId, dto.getPointItemNo());
+        return ResponseEntity.ok("success");
     }
 }

@@ -8,17 +8,16 @@ import java.sql.Timestamp;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data @AllArgsConstructor @NoArgsConstructor @Builder
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class PointItemStoreDto {
-    private long pointItemNo;
+    private Long pointItemNo;
     private String pointItemName;
-    private String pointItemType;
     private String pointItemContent;
     private long pointItemPrice;
-    private long pointItemStock;
-    private String pointItemSrc;
+    private int pointItemStock;
+    private String pointItemType;
     private String pointItemReqLevel;
-    private Timestamp pointItemRegDate;
-    // 1이면 한정구매, 0이면 무제한이라고 가정
-    private int pointItemIsLimitedPurchase; 
+    private int pointItemIsLimitedPurchase; // 한정판 여부
+    private int pointItemDailyLimit;        // <--- 추가: 일일 구매 제한 횟수
+    private String pointItemSrc;
 }
