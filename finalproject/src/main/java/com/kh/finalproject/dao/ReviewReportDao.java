@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.kh.finalproject.dto.ReviewReportDto;
+import com.kh.finalproject.vo.ReviewReportListVO;
 
 @Repository
 public class ReviewReportDao {
@@ -21,7 +22,7 @@ public class ReviewReportDao {
 	}
 	
 	//리뷰 신고 조회(마이페이지 and 관리자 페이지)
-	public List<ReviewReportDto> selectList(){
+	public List<ReviewReportListVO> selectList(){
 		return sqlSession.selectList("reviewReport.selectList");
 	}
 	

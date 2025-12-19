@@ -15,7 +15,7 @@ import com.kh.finalproject.dao.ReviewReportDao;
 import com.kh.finalproject.dto.ReviewReportDto;
 import com.kh.finalproject.error.NeedPermissionException;
 import com.kh.finalproject.service.ReviewService;
-import com.kh.finalproject.vo.ReviewVO;
+import com.kh.finalproject.vo.ReviewReportListVO;
 import com.kh.finalproject.vo.TokenVO;
 
 @CrossOrigin
@@ -55,7 +55,7 @@ public class ReviewReportRestController {
 	
 	//신고 전체 목록 조회 (관리자용)
 	@GetMapping("/list")
-	public List<ReviewReportDto> getList(
+	public List<ReviewReportListVO> getList(
 			@RequestAttribute TokenVO tokenVO
 			) {
 		if(tokenVO.getLoginLevel().equals("관리자")==false) throw new NeedPermissionException();
