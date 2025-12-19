@@ -25,6 +25,29 @@
 		select * from review_report_list
 		order by review_report_date desc
 	</select>
+	
+	<!-- 개별 리뷰신고 조회(확인용) -->
+	<select id= "selectOne" resultType="ReviewReportDto">
+		select * from review_report
+		where review_report_id = #{reviewReportId}
+	</select>
+
+	<!-- 신고 내역 삭제 -->
+	<delete id="delete">
+		delete from review_report
+		where review_report_id = #{reviewReportId}
+	</delete>
+	
+		<!-- 신고 유형 별 횟수 -->
+    <select id="countByType" resultType="map">
+        select review_report_type, count(*) as count
+        from review_report
+        where review_report_review_id = #{reviewReportReviewId}
+        group by review_report_type
+    </select>
+	
+
+	
 
 
 </mapper>

@@ -44,4 +44,3 @@ public class ReviewReportDao {
 		return sqlSession.selectList("reviewReport.countByType", reviewReportReviewId);
 	}
 
-}
