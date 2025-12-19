@@ -21,8 +21,8 @@
 	</insert>
 
 	<!-- 전체 리뷰 신고 조회 -->
-	<select id = "selectList" resultType="reviewReportDto">
-		select * from review_report
+	<select id = "selectList" resultType="ReviewReportListVO">
+		select * from review_report_list
 		order by review_report_date desc
 	</select>
 
