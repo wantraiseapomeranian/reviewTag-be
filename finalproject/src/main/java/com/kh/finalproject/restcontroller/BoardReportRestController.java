@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.finalproject.dto.BoardReportDto;
-import com.kh.finalproject.dto.QuizReportDto;
 import com.kh.finalproject.service.BoardReportService;
 import com.kh.finalproject.vo.TokenVO;
 

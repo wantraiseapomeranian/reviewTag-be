@@ -13,10 +13,9 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class BoardReportStatsVO {
-    private int quizId;                 // 신고된 게시글 번호
-    private String boardWriterId;       // 신고된 게시글 작성자 아이디
+    private int boardNo;                 // 신고된 게시글 번호
     private String writerNickname;     // 신고된 게시글 작성자 닉네임
-    
+    private int boardReportId;
     private int totalReportCount;       // 총 신고 수
     
     // 유형별 카운트

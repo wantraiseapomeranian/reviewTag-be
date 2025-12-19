@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.kh.finalproject.dto.BoardDto;
 import com.kh.finalproject.dto.BoardReportDto;
 import com.kh.finalproject.vo.BoardReportDetailVO;
 import com.kh.finalproject.vo.BoardReportStatsVO;
@@ -67,9 +68,14 @@ public class BoardReportDao {
 		return sqlSession.selectList("boardReport.selectBoardReportList", params);
     }
 	
-	//특정 퀴즈의 기타 신고 상세 내역 조회
+	//특정 게시글의 기타 신고 상세 내역 조회
 	public List<BoardReportDetailVO> selectReportDetails(int boardNo) {
         return sqlSession.selectList("boardReport.selectReportEtcDetails", boardNo);
     }
+	
+	//신고된 게시글 내용 조회
+	public BoardDto selectBoardText(int boardReportBoardNo) {
+		return sqlSession.selectOne("boardReport.selectBoardText", boardReportBoardNo);
+	}
 
 }

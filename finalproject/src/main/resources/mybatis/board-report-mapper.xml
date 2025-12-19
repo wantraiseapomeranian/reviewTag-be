@@ -31,7 +31,7 @@
 	<!-- 게시글 별 신고 조회  -->
 	<select id="selectListByBoard" resultType="BoardReportDto">
 		select * from board_report
-		where board_report_board_no = #{quizReportBoardNo}
+		where board_report_board_no = #{boardReportBoardNo}
 		order by board_report_date desc
 	</select>
 	
@@ -44,7 +44,7 @@
 	<!-- 게시판 신고 상세 조회 -->
 	<select id="detail" resultType="BoardReportDto">
     	select * from board_report 
-    	where board_report_id = #{quizBoardId}
+    	where board_report_id = #{boardBoardNo}
 	</select>
 
 	<!-- 신고 유형 별 횟수 -->
@@ -73,21 +73,30 @@
         select * from (
         select rownum rn, TMP.* from (
         select * from view_board_report_stats
-        order by last_reported_at desc
+        order by last_reported_at desc, board_no desc
                 ) TMP
     ) where rn between #{start} and #{end}
     </select>
+    
+    <!-- 신고된 게시글 내용 조회 -->
+	<select id="selectBoardText" resultType="BoardDto">
+		select board_text, board_unlike from board where  board_no = #{boardReportBoardNo}
+	</select>
 	
 	<!-- 상세 신고 사유 조회 -->
     <select id="selectReportEtcDetails" parameterType="int" resultType="BoardReportDetailVO">
         select
             m.member_nickname AS memberNickname,
+            b.board_title AS boardTitle,
+            b.board_writer As boardWriterId,
             br.board_report_content AS boardReportContent,
             br.board_report_date AS boardReportDate
         from
             board_report br
         left join
             member m ON br.board_report_member_id = m.member_id
+        left join
+            board b ON br.board_report_board_no = b.board_no
         where
             br.board_report_board_no = #{boardNo}
             AND br.board_report_type = 'ETC'
