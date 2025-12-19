@@ -53,9 +53,17 @@ public class QuizLogService {
 			}
 		}
 		int getPoint = 20; // 정답별 획득 포인트배율
+		int totalEarned = correctCount * getPoint;
 		
 		//correctCount에 따라 포인트 지급 로직 호출 구현 예정
-		pointService.addPoint(memberId, correctCount*getPoint, "GET");
+		if (totalEarned > 0) {
+            pointService.addPoint(
+                memberId, 
+                totalEarned, 
+                "GET", 
+                "영화 퀴즈 정답 보상 (" + correctCount + "개 정답)"
+            );
+        }
 		
 		return correctCount; //정답 개수를 int로 반환
 	}

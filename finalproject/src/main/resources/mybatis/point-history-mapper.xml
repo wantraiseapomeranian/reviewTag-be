@@ -15,13 +15,15 @@
           point_history_id, 
           point_history_member_id, 
           point_history_amount, 
-          point_history_trx_type
+          point_history_trx_type,
+          point_history_reason
       )
       VALUES(
           seq_point_history.nextval, 
           #{pointHistoryMemberId}, 
           #{pointHistoryAmount}, 
-          #{pointHistoryTrxType} 
+          #{pointHistoryTrxType},
+          #{pointHistoryReason} 
        )
   </insert>
 
@@ -31,7 +33,8 @@
           point_history_member_id as pointHistoryMemberId,
           point_history_amount as pointHistoryAmount,
           point_history_trx_type as pointHistoryTrxType,
-          point_history_created_at as pointHistoryCreatedAt
+          point_history_created_at as pointHistoryCreatedAt,
+          point_history_reason as pointHistoryReason
       FROM point_history
       WHERE point_history_member_id = #{memberId}
       ORDER BY point_history_id DESC
@@ -43,7 +46,8 @@
           point_history_member_id as pointHistoryMemberId,
           point_history_amount as pointHistoryAmount,
           point_history_trx_type as pointHistoryTrxType,
-          point_history_created_at as pointHistoryCreatedAt
+          point_history_created_at as pointHistoryCreatedAt,
+          point_history_reason as pointHistoryReason
       FROM point_history
       WHERE point_history_id = #{pointHistoryId}
   </select>
@@ -57,7 +61,8 @@
       UPDATE point_history
       SET
           point_history_trx_type = #{pointHistoryTrxType}, 
-          point_history_amount = #{pointHistoryAmount}
+          point_history_amount = #{pointHistoryAmount},
+          point_history_reason = #{pointHistoryReason}
       WHERE
           point_history_id = #{pointHistoryId}
   </update>
@@ -66,7 +71,7 @@
     SELECT count(*) 
     FROM point_history 
     WHERE point_history_member_id = #{memberId}
-    
+
     <choose>
         <when test="type == 'earn'">
             AND point_history_amount > 0
@@ -78,7 +83,7 @@
             AND point_history_amount = 0
         </when>
     </choose>
-  </select>
+</select>
 
   <select id="selectListByMemberIdPaging" resultType="PointHistoryDto">
     SELECT * FROM (
@@ -88,6 +93,7 @@
                 point_history_member_id as pointHistoryMemberId,
                 point_history_amount as pointHistoryAmount,
                 point_history_trx_type as pointHistoryTrxType,
+                point_history_reason as pointHistoryReason,
                 point_history_created_at as pointHistoryCreatedAt
             FROM point_history
             WHERE point_history_member_id = #{memberId}

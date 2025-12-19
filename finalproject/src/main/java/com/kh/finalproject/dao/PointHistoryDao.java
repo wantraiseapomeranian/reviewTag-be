@@ -60,4 +60,5 @@ public class PointHistoryDao {
 
         return sqlSession.selectList("pointhistory.selectListByMemberIdPaging", params);
     }
+
 }

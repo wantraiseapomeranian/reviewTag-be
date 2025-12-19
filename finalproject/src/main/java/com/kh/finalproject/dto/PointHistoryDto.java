@@ -18,4 +18,6 @@ public class PointHistoryDto {
     private String pointHistoryTrxType;  
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private Timestamp pointHistoryCreatedAt; 
+    
+    private String pointHistoryReason;//상세 사유
 }

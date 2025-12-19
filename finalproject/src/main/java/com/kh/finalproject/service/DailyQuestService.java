@@ -29,8 +29,6 @@ public class DailyQuestService {
     @Autowired private PointService pointService;       // 포인트 지급 및 이력 관리
     @Autowired private DailyQuizDao quizDao;            // 퀴즈 DB 접근 (SqlSession 사용)
 
-    // [변경 2] 기존의 static List<DailyQuizVO> 및 static 블록 전체 삭제함.
-    // (이제 데이터는 오라클 DB에서 가져옵니다)
 
     private String getTodayStr() {
         return LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
@@ -131,7 +129,8 @@ public class DailyQuestService {
             pointService.addPoint(
                 memberId, 
                 targetQuest.getReward(), 
-                "GET"
+                "GET",
+                "일일 퀘스트 보상: " + targetQuest.getTitle() 
             );
             
             return targetQuest.getReward();
