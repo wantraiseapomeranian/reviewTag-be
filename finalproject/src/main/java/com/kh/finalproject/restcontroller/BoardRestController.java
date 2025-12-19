@@ -11,7 +11,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,31 +65,25 @@ public class BoardRestController {
 
 	// 게시글 등록
 	@PostMapping("/")
-	public ResponseEntity<Integer> insert(
-	        @RequestAttribute TokenVO tokenVO,
-	        @RequestBody BoardDto boardDto) {
-	    
-	    // 1. 로그인 ID 추출
-	    String loginId = tokenVO.getLoginId();
 
-	    // 2. 게시글 등록 및 번호 반환
-	    int boardNo = boardDao.insert(boardDto);
+	
+		
 
-	    // 3. 포인트 지급 (PointService의 addPoint 메서드 활용)
-	    // 파라미터: loginId, 금액, 유형, 사유
-	    int getPoint = 10;
-	    pointService.addPoint(loginId, getPoint, "GET", "게시글 작성 포인트");
+	public void insert(@RequestAttribute TokenVO tokenVO,
+								@RequestBody BoardDto boardDto) {
+		String loginId = tokenVO.getLoginId();
 
-	    // 4. 첨부파일 연결 로직
-	    if(boardDto.getAttachmentNoList() != null) {
-	        for(int attachmentNo : boardDto.getAttachmentNoList()) {
-	            boardDao.connect(boardNo, attachmentNo);
-	        }
-	    }
-
-	    // 5. 생성된 게시글 번호를 결과로 반환 (201 Created 가 더 적절할 수 있음)
-	    return ResponseEntity.ok(boardNo);
+		int boardNo =  boardDao.insert(boardDto);
+		int getPoint = 10;
+		pointService.addPoint(loginId, getPoint, "GET","게시글작성");
+		if(boardDto.getAttachmentNoList() != null) {
+			for(int attachmentNo : boardDto.getAttachmentNoList()) {
+				boardDao.connect(boardNo, attachmentNo);
+			}
+		}
 	}
+
+
 	//글 등록 전에 미리 이미지를 업로드하는 매핑 (임시이미지)
 	@PostMapping("/temp")
 	public int temp(@RequestParam MultipartFile attach) throws IllegalStateException, IOException {
@@ -196,53 +189,33 @@ public class BoardRestController {
 
 	// 게시글 삭제
 	@DeleteMapping("/{boardNo}")
-	public ResponseEntity<String> delete(
-	        @RequestAttribute TokenVO tokenVO,
-	        @PathVariable int boardNo) {
-	    
-	    String loginId = tokenVO.getLoginId();
-	    
-	    // 1. 게시글 존재 여부 및 작성자 확인
-	    BoardDto boardDto = boardDao.selectOne(boardNo);
-	    if(boardDto == null) throw new TargetNotfoundException("존재하지 않는 글입니다.");
-	    
-	    // [권한 체크 추가 제안] 작성자 본인 혹은 관리자만 삭제 가능하도록
-	    // if(!boardDto.getBoardWriter().equals(loginId)) throw new RuntimeException("삭제 권한이 없습니다.");
+	public void delete(@RequestAttribute TokenVO tokenVO,@PathVariable int boardNo) {
+		String loginId = tokenVO.getLoginId();
+		BoardDto boardDto = boardDao.selectOne(boardNo);
+		if(boardDto == null) throw new TargetNotfoundException("존재하지 않는 글");
+		
+		// 유저가 가지고있는 포인트 확인해서 변경
+		MemberDto memberDto = memberDao.selectOne(loginId);
+		int losePoint = -10; // 삭제로 잃는 포인트
+		int point = memberDto.getMemberPoint();  
+		if(point >= 10) {
+			pointService.addPoint(loginId, losePoint,"GET","게시글 삭제");
+		}
+		else {
+			pointService.addPoint(loginId, -point, "USE", "게시글삭제");
+		}
 
-	    // 2. 포인트 회수 로직
-	    MemberDto memberDto = memberDao.selectOne(loginId);
-	    if (memberDto != null) {
-	        int currentPoint = memberDto.getMemberPoint();
-	        int losePoint;
-	        
-	        // 10점 이상이면 10점 차감, 그보다 적으면 전액 차감(0점)
-	        if(currentPoint >= 10) {
-	            losePoint = -10;
-	        } else {
-	            losePoint = -currentPoint; 
-	        }
-	        
-	        // PointService의 addPoint(ID, 금액, 유형, 사유) 호출
-	        pointService.addPoint(loginId, losePoint, "USE", "게시글 삭제로 인한 포인트 회수");
-	    }
+		Document document = Jsoup.parse(boardDto.getBoardText());
+		Elements elements = document.select(".cutom-image");
 
-	    // 3. Jsoup을 이용한 이미지 및 첨부파일 삭제
-	    Document document = Jsoup.parse(boardDto.getBoardText());
-	    Elements elements = document.select(".custom-image"); // 오타 수정: cutom -> custom
+		for(Element element : elements) {
+			int attachmentNo = Integer.parseInt(element.attr("data-pk"));
+			attachmentService.delete(attachmentNo);
+		}
 
-	    for(Element element : elements) {
-	        String pk = element.attr("data-pk");
-	        if(pk != null && !pk.isEmpty()) {
-	            int attachmentNo = Integer.parseInt(pk);
-	            attachmentService.delete(attachmentNo);
-	        }
-	    }
-
-	    // 4. 게시글 삭제 실행
-	    boardDao.delete(boardNo);
-	    
-	    return ResponseEntity.ok("success");
+		boardDao.delete(boardNo);
 	}
+
 
 
 	/////////////////////////좋아요 & 싫어요
