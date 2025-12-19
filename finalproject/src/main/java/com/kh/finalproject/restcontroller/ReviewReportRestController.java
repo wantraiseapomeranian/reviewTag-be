@@ -1,10 +1,13 @@
 package com.kh.finalproject.restcontroller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,5 +65,24 @@ public class ReviewReportRestController {
 		return reviewReportDao.selectList();
 	}
 	
+	//신고 삭제 (관리자용)
+	@DeleteMapping("/{quizReportId}")
+	public boolean deleteReport(
+			@RequestAttribute TokenVO tokenVO,
+			@PathVariable long reviewReportId) {
+		if(tokenVO.getLoginLevel().equals("관리자")==false) throw new NeedPermissionException();
+		ReviewReportDto reviewReportDto = reviewReportDao.selectOne(reviewReportId);
+		if(reviewReportDto == null) return false;
+		// 신고 삭제	
+		return reviewReportDao.delete(reviewReportId);
+	}
+	
+	// 신고 유형별 횟수
+	@GetMapping("/stats/{quizId}")
+	public List<Map<String, Object>> count(
+			@RequestAttribute TokenVO tokenVO,
+			@PathVariable long reviewReportReviewId){
+		return reviewReportDao.countByType(reviewReportReviewId);
+	}
 	
 }
