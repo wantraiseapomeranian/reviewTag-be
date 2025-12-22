@@ -9,5 +9,8 @@
 		select * from member_watchlist
 		where watchlist_member = #{loginId}
 	</select>
-
+<select id="countWatchlist" resultType="int">
+    select count(*) from member_watchlist
+    where watchlist_member = #{loginId}
+</select>
 </mapper>

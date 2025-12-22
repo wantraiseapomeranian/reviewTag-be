@@ -17,5 +17,7 @@ public class MemberWatchDao {
 	public List<MemberWatchListVO> selectList(String loginId){
 	 return sqlSession.selectList("memberWatch.selectList",loginId);
 	}
-	
+	public int countWatchlist(String loginId) {
+	    return sqlSession.selectOne("memberWatch.countWatchlist", loginId);
+	}
 }

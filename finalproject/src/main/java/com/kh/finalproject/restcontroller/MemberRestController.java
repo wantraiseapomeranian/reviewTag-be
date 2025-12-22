@@ -96,13 +96,21 @@ public class MemberRestController {
         MemberDto memberDto = memberDao.selectOne(loginId);
         if(memberDto == null) throw new TargetNotfoundException();
 
-        // 2. 치장 및 포인트 정보 조회 (작성하신 Service 활용)
+        // 2. 포인트 정보 조회
         MemberPointVO pointVO = pointService.getMyPointInfo(loginId);
 
-        // 3. 합쳐서 반환
+        // 3. 각 항목별 카운트 조회
+        int reviewCount = memberReviewDao.countReview(loginId);
+        int wishCount = memberWatchDao.countWatchlist(loginId);
+        int quizCount = memberQuizDao.countAnswerQuiz(loginId);
+
+        // 4. 합쳐서 반환
         return MemberMypageResponseVO.builder()
                 .member(memberDto)
                 .point(pointVO)
+                .reviewCount(reviewCount)
+                .wishCount(wishCount)
+                .quizCount(quizCount)
                 .build();
     }
 	

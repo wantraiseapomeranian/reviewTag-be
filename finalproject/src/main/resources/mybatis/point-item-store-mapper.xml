@@ -60,7 +60,7 @@
             POINT_ITEM_DAILY_LIMIT as pointItemDailyLimit FROM POINT_ITEM_STORE
         ORDER BY point_item_no DESC
     </select>
-  
+  	
     <select id="selectOneNumber" resultType="PointItemStoreDto">
         SELECT 
             point_item_no as pointItemNo,

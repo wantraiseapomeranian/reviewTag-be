@@ -17,5 +17,7 @@ public class MemberReviewDao {
 	public List<MemberReviewListVO> selectList(String loginId){
 	 return sqlSession.selectList("memberReview.selectList",loginId);
 	}
-	
+	public int countReview(String loginId) {
+	    return sqlSession.selectOne("memberReview.countReview", loginId);
+	}
 }

@@ -180,4 +180,24 @@ public class PointStoreRestController {
         pointService.deleteItem(loginId, dto.getPointItemNo());
         return ResponseEntity.ok("success");
     }
+    @GetMapping("/detail/{itemNo}")
+    public ResponseEntity<PointItemStoreDto> detail(@PathVariable long itemNo) {
+        PointItemStoreDto item = pointItemDao.selectOneNumber(itemNo);
+        if (item == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(item);
+    }
+    @PostMapping("/detail/{itemNo}/buy")
+    public ResponseEntity<String> buy(
+            @RequestAttribute(required = false) String loginId,
+            @PathVariable long itemNo) { // @PathVariable로 경로상의 번호를 바로 받음
+
+        if (loginId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        // 서비스 호출 (상세 페이지에서 받은 itemNo 전달)
+        pointService.purchaseItem(loginId, itemNo);
+
+        return ResponseEntity.ok("success");
+    }
 }

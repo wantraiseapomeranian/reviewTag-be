@@ -206,7 +206,7 @@ public class BoardRestController {
 		}
 
 		Document document = Jsoup.parse(boardDto.getBoardText());
-		Elements elements = document.select(".cutom-image");
+		Elements elements = document.select(".custom-image");
 
 		for(Element element : elements) {
 			int attachmentNo = Integer.parseInt(element.attr("data-pk"));

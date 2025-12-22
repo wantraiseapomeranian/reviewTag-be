@@ -9,5 +9,8 @@
 		select * from member_review_list
 		where review_writer = #{loginId}
 	</select>
-
+  <select id="countReview" resultType="int">
+    select count(*) from member_review_list
+    where review_writer = #{loginId}
+</select>
 </mapper>
