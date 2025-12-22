@@ -45,6 +45,7 @@ import com.kh.finalproject.error.NeedPermissionException;
 import com.kh.finalproject.error.TargetNotfoundException;
 import com.kh.finalproject.service.AdminService;
 import com.kh.finalproject.service.IconService;
+import com.kh.finalproject.service.PointService;
 import com.kh.finalproject.service.QuizService;
 import com.kh.finalproject.service.TokenService;
 import com.kh.finalproject.vo.BoardReportDetailVO;
@@ -99,7 +100,9 @@ public class AdminRestController {
 	@Autowired
 	private BoardReportDao boardReportDao;
 	
-	
+	@Autowired
+	private PointService pointService;
+
 	
 
 	//기존 회원 목록 조회(관리자 제외, 일반 페이징)
@@ -484,5 +487,55 @@ public class AdminRestController {
                     ? ResponseEntity.ok().build()
                     : ResponseEntity.notFound().build();
         }
-	
+        
+        @GetMapping("/store/list")
+        public List<PointItemStoreDto> list() { 
+            return pointItemStoreDao.selectList(); 
+        }
+        @PostMapping("/store/add")
+        public ResponseEntity<String> addItem(
+                @RequestAttribute TokenVO tokenVO, 
+                @RequestBody PointItemStoreDto dto) {
+            
+        	  String loginId = tokenVO.getLoginId();
+              pointService.addItem(loginId, dto);
+            
+            return ResponseEntity.ok("아이템이 등록되었습니다.");
+        }
+
+        // 아이템 수정
+        @PutMapping("/store/edit")
+        public ResponseEntity<String> editItem(
+                @RequestAttribute TokenVO tokenVO, 
+                @RequestBody PointItemStoreDto dto) {
+            
+            String loginId = tokenVO.getLoginId();
+            pointService.editItem(loginId, dto);
+            
+            return ResponseEntity.ok("아이템 정보가 수정되었습니다.");
+        }
+
+        // 아이템 삭제 (상점 제거)
+        @DeleteMapping("/store/delete/{itemNo}")
+        public ResponseEntity<String> deleteItem(
+                @RequestAttribute TokenVO tokenVO, 
+                @PathVariable long itemNo) {
+            
+            String loginId = tokenVO.getLoginId();
+            pointService.deleteItem(loginId, itemNo);
+            
+            return ResponseEntity.ok("아이템이 삭제되었습니다.");
+        }
+
+        // 인벤토리 아이템 회수
+        @DeleteMapping("/discard/{inventoryNo}")
+        public ResponseEntity<String> discardItem(
+                @RequestAttribute TokenVO tokenVO, 
+                @PathVariable long inventoryNo) {
+            
+            String loginId = tokenVO.getLoginId();
+            pointService.discardItem(loginId, inventoryNo);
+            
+            return ResponseEntity.ok("인벤토리에서 아이템을 회수했습니다.");
+        }
 }
