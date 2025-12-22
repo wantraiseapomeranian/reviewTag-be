@@ -4,8 +4,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.finalproject.dao.IconDao;
 import com.kh.finalproject.dto.IconDto;
 import com.kh.finalproject.dto.MemberIconDto;
 import com.kh.finalproject.service.IconService;
@@ -17,6 +26,7 @@ import com.kh.finalproject.vo.PointUseVO;
 public class IconRestController {
 
     @Autowired private IconService iconService;
+    @Autowired private IconDao iconDao;
 
     // ---------------------------------------------------
     // [관리자] 기능
@@ -90,4 +100,11 @@ public class IconRestController {
         iconService.unequipIcon(loginId);
         return "success";
     }
+    
+    @GetMapping("/contents/{iconContents}")
+    public List<IconDto> getIconList(@PathVariable long iconContents) {
+        return iconDao.selectListByContents(iconContents);
+    }
+    
+    
 }

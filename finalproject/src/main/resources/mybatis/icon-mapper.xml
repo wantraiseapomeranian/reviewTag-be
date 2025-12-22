@@ -4,8 +4,8 @@
 
 
     <insert id="insert">
-        INSERT INTO ICON (icon_id, icon_name, icon_rarity, icon_category, icon_src)
-        VALUES (seq_icon.nextval, #{iconName}, #{iconRarity}, #{iconCategory}, #{iconSrc})
+        INSERT INTO ICON (icon_id, icon_name, icon_rarity, icon_category, icon_src, icon_contents)
+        VALUES (seq_icon.nextval, #{iconName}, #{iconRarity}, #{iconCategory}, #{iconSrc}, #{iconContents})
     </insert>
 
     <update id="update">
@@ -24,6 +24,12 @@
     <select id="selectList" resultType="IconDto">
         SELECT * FROM ICON ORDER BY icon_id DESC
     </select>
+    
+    <select id="selectListByContents" resultType="IconDto">
+        SELECT * FROM ICON WHERE icon_contents = ${iconContents}ORDER BY icon_id DESC
+    </select>
+    
+    
 
     <select id="countIcons" resultType="int">
         SELECT count(*) FROM ICON

@@ -34,6 +34,10 @@ public class IconDao {
     public List<IconDto> selectList() { 
         return sqlSession.selectList("icon.selectList"); 
     }
+    // 전체 아이콘 목록 조회
+    public List<IconDto> selectListByContents(Long iconContents) { 
+        return sqlSession.selectList("icon.selectListByContents",iconContents); 
+    }
     
     public int countIcons(String type) {
         Map<String, Object> params = new HashMap<>();
