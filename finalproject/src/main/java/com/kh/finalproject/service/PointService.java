@@ -137,25 +137,42 @@ public class PointService {
                 .build();
     }
 
-    // [6] 아이템 사용 및 장착 (수정됨)
+    // [6] 아이템 사용 및 장착 (수정 완료)
     @Transactional
     public void useItem(String loginId, long inventoryNo, String extraValue) {
         InventoryDto inven = inventoryDao.selectOne(inventoryNo);
-        if (inven == null || !inven.getInventoryMemberId().equals(loginId)) throw new RuntimeException("아이템 권한 없음");
+        if (inven == null || !inven.getInventoryMemberId().equals(loginId)) 
+            throw new RuntimeException("아이템 권한 없음");
 
         PointItemStoreDto item = pointItemDao.selectOneNumber(inven.getInventoryItemNo());
         String type = item.getPointItemType();
 
         switch (type) {
             case "CHANGE_NICK":
-                if (extraValue == null || extraValue.trim().isEmpty()) throw new RuntimeException("새 닉네임을 입력하세요.");
-                memberDao.updateNickname(MemberDto.builder().memberId(loginId).memberNickname(extraValue).build());
+                if (extraValue == null || extraValue.trim().isEmpty()) 
+                    throw new RuntimeException("새 닉네임을 입력하세요.");
+                memberDao.updateNickname(MemberDto.builder()
+                        .memberId(loginId)
+                        .memberNickname(extraValue)
+                        .build());
                 decreaseInventoryOrDelete(inven);
-                break;    
+                break;
+
             case "HEART_RECHARGE":
                 chargeHeart(loginId, 5); 
                 decreaseInventoryOrDelete(inven);
                 break;
+
+            case "RANDOM_POINT": // ⭐ 새로 추가된 랜덤 포인트 로직
+                // 500 ~ 3500 사이의 100단위 숫자 생성
+                // (0~30 사이 난수) * 100 + 500
+                int randomIdx = new java.util.Random().nextInt(31); // 0~30
+                int won = (randomIdx * 100) + 500;
+                
+                addPoint(loginId, won, "GET", "포인트 랜덤 박스 사용 + " + won + "원 획득");
+                decreaseInventoryOrDelete(inven);
+                break;
+
             case "DECO_NICK": case "DECO_BG": case "DECO_ICON": case "DECO_FRAME":
                 // 중복 장착 방지: 해당 카테고리의 모든 'Y'를 'N'으로 먼저 변경
                 unequipByType(loginId, type); 
@@ -163,8 +180,9 @@ public class PointService {
                 inven.setInventoryEquipped("Y");
                 inventoryDao.update(inven);
                 break;
+            
             case "VOUCHER":
-                addPoint(loginId, (int)item.getPointItemPrice(), "GET", "상품권 사용");
+                addPoint(loginId, (int)item.getPointItemPrice(), "GET", "상품권 사용 " + item.getPointItemPrice() + "원 획득");
                 decreaseInventoryOrDelete(inven);
                 break;
         }

@@ -129,20 +129,28 @@ public class MemberRestController {
 	//회원정보수정 (전체수정)
 	@PutMapping("/{memberId}")
 	public void edit(
-			@PathVariable String memberId,
-			@RequestBody MemberDto memberDto) {
-		MemberDto originDto = memberDao.selectOne(memberId);
-		if(originDto == null) throw new TargetNotfoundException();
-		// 각 요소 입력
-		originDto.setMemberPw(memberDto.getMemberPw());
-		originDto.setMemberEmail(memberDto.getMemberEmail());
-		originDto.setMemberBirth(memberDto.getMemberBirth());
-		originDto.setMemberContact(memberDto.getMemberContact());
-		originDto.setMemberLevel(memberDto.getMemberLevel());
-		originDto.setMemberPost(memberDto.getMemberPost());
-		originDto.setMemberAddress1(memberDto.getMemberAddress1());
-		originDto.setMemberAddress2(memberDto.getMemberAddress2());
-		memberDao.update(originDto);
+	        @PathVariable String memberId,
+	        @RequestBody MemberDto memberDto) {
+
+	    MemberDto originDto = memberDao.selectOne(memberId);
+	    if(originDto == null) throw new TargetNotfoundException();
+
+	   
+	    if(memberDto.getMemberBirth() != null)
+	        originDto.setMemberBirth(memberDto.getMemberBirth());
+
+	    if(memberDto.getMemberContact() != null)
+	        originDto.setMemberContact(memberDto.getMemberContact());
+
+	    if(memberDto.getMemberPost() != null)
+	        originDto.setMemberPost(memberDto.getMemberPost());
+
+	    if(memberDto.getMemberAddress1() != null)
+	        originDto.setMemberAddress1(memberDto.getMemberAddress1());
+
+	    if(memberDto.getMemberAddress2() != null)
+	        originDto.setMemberAddress2(memberDto.getMemberAddress2());
+	    memberDao.update(originDto);
 	}
 	
 	@PutMapping("/password/{loginId}")

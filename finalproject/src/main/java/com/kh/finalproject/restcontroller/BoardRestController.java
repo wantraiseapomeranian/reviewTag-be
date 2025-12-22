@@ -217,7 +217,6 @@ public class BoardRestController {
 	}
 
 
-
 	/////////////////////////좋아요 & 싫어요
 
 
