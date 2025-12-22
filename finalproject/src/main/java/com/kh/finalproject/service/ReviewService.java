@@ -7,7 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.kh.finalproject.dao.MemberDao;
 import com.kh.finalproject.dao.ReviewDao;
 import com.kh.finalproject.dao.ReviewLikeDao;
+import com.kh.finalproject.dao.ReviewReportDao;
 import com.kh.finalproject.dto.ReviewDto;
+import com.kh.finalproject.dto.ReviewReportDto;
+import com.kh.finalproject.error.NeedPermissionException;
 import com.kh.finalproject.error.TargetNotfoundException;
 import com.kh.finalproject.vo.ReviewVO;
 
@@ -20,6 +23,9 @@ public class ReviewService {
 	private MemberDao memberDao;
 	@Autowired
 	private ReviewLikeDao reviewLikeDao;
+	@Autowired
+	private ReviewReportDao reviewReportDao;
+	
 
 	@Transactional
 	// 리뷰 작성시 신뢰도 +1
@@ -79,6 +85,32 @@ public class ReviewService {
 		System.out.println("총 신뢰도 :" + totalReliability);
 
 		memberDao.updateReliabilitySet(writer, totalReliability);
+	}
+	
+	//신고 삭제
+	@Transactional
+	public void DeleteReview(String loginLevel, long reviewReportId) {
+		
+		//관리자인지 검사
+		if(loginLevel.equals("관리자")==false) throw new NeedPermissionException();
+		
+		//신고된 리뷰인지 확인
+		ReviewReportDto reviewReportDto = reviewReportDao.selectOne(reviewReportId);
+		if(reviewReportDto == null) throw new TargetNotfoundException();
+		
+		//리뷰 아이디 찾기
+		long reviewId = reviewReportDto.getReviewReportReviewId();
+		
+		//컨텐츠 아이디 찾기
+		ReviewDto findDto = reviewDao.selectOne(reviewId);
+		
+		//리뷰 삭제
+		if(findDto != null) {
+	        reviewDao.deleteByPK(reviewId);
+	    }
+		
+		//신고 삭제
+		reviewReportDao.delete(reviewReportId);
 	}
 
 }

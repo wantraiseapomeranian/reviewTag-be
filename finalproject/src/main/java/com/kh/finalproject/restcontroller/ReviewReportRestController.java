@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.finalproject.dao.ReviewDao;
 import com.kh.finalproject.dao.ReviewReportDao;
+import com.kh.finalproject.dto.ReviewDto;
 import com.kh.finalproject.dto.ReviewReportDto;
 import com.kh.finalproject.error.NeedPermissionException;
 import com.kh.finalproject.service.ReviewService;
@@ -30,6 +32,7 @@ public class ReviewReportRestController {
 	private ReviewReportDao reviewReportDao;
 	@Autowired
 	private ReviewService reviewService;
+	
 	
 	@PostMapping("/")
 	public void insertReviewReport(
@@ -67,14 +70,13 @@ public class ReviewReportRestController {
 	
 	//신고 삭제 (관리자용)
 	@DeleteMapping("/{reviewReportId}")
-	public boolean deleteReport(
+	public void deleteReport(
 			@RequestAttribute TokenVO tokenVO,
 			@PathVariable long reviewReportId) {
-		if(tokenVO.getLoginLevel().equals("관리자")==false) throw new NeedPermissionException();
-		ReviewReportDto reviewReportDto = reviewReportDao.selectOne(reviewReportId);
-		if(reviewReportDto == null) return false;
-		// 신고 삭제	
-		return reviewReportDao.delete(reviewReportId);
+		
+		String loginLevel = tokenVO.getLoginLevel();
+		
+		reviewService.DeleteReview(loginLevel, reviewReportId);
 	}
 	
 	// 신고 유형별 횟수

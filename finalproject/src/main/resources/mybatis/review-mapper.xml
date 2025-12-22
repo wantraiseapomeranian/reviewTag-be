@@ -36,6 +36,11 @@
 		where review_contents = #{reviewContents} and review_no = #{reviewNo}
 	</select>
 	
+	<!--  reviewNo로 조회 -->
+	<select id="selectOneByReviewNo" resultType="ReviewDto">
+    	select * from review where review_no = #{reviewNo}
+	</select>
+	
 	
 	
 	<!-- 컨텐츠 아이디로 조회 -->
@@ -96,6 +101,11 @@
 	<update id="updateReviewReviewLike">
 		update review set review_like = #{count} where review_no = #{reviewNo}
 	</update>
+	
+	<delete id="deleteByPK">
+    	delete from review 
+    	where review_no = #{reviewNo}
+	</delete>
 
 	
 </mapper>

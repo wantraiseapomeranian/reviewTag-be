@@ -24,7 +24,8 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
     			"/board/edit",
     			"/board/delete",
     			"/board/viewUpdate/**",
-    			"/board/reply/**");
+    			"/board/reply/**"
+    			);
 
     	
     	

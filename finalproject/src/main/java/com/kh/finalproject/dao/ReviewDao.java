@@ -56,7 +56,7 @@ public class ReviewDao {
 	}
 	
 	public ReviewDto selectOne(Long reviewNo) {
-		return sqlSession.selectOne("review.selectOne", reviewNo);
+		return sqlSession.selectOne("review.selectOneByReviewNo", reviewNo);
 	}
 	
 //	public List<ReviewDto> detail(String contentsTitle) { //컨텐츠 제목으로 조회
@@ -74,6 +74,11 @@ public class ReviewDao {
 		map3.put("reviewContents", reviewContents);
 		map3.put("reviewNo", reviewNo);
 		return sqlSession.delete("review.delete", map3) > 0;
+	}
+	
+	//하나만 삭제
+	public boolean deleteByPK(long reviewId) {
+		return sqlSession.delete("review.deleteByPK", reviewId) > 0;
 	}
 
 	//리뷰 쓴사람 조회
