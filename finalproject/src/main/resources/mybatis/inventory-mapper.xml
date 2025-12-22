@@ -104,4 +104,19 @@
       AND M.MEMBER_LEVEL != '관리자'
     ORDER BY I.INVENTORY_CREATED_AT DESC
 </select>
+
+<select id="selectOneByMemberAndItem" resultType="InventoryDto">
+    SELECT 
+        INVENTORY_NO AS "inventoryNo",
+        INVENTORY_MEMBER_ID AS "inventoryMemberId",
+        INVENTORY_ITEM_NO AS "inventoryItemNo",
+        INVENTORY_QUANTITY AS "inventoryQuantity",
+        INVENTORY_CREATED_AT AS "inventoryCreatedAt",
+        INVENTORY_EQUIPPED AS "inventoryEquipped"
+    FROM INVENTORY
+    WHERE INVENTORY_MEMBER_ID = #{inventoryMemberId}
+      AND INVENTORY_ITEM_NO = #{inventoryItemNo}
+</select>
+
 </mapper>
+

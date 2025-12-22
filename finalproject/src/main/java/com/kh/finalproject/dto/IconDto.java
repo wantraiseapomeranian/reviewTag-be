@@ -12,4 +12,5 @@ public class IconDto {
     private String iconRarity; // COMMON, RARE, EPIC, LEGENDARY
     private String iconCategory;
     private String iconSrc;
+    private Long iconContents;
 }
