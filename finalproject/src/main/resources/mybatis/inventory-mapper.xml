@@ -131,4 +131,31 @@
         WHERE point_item_type = #{type}
     )
 </update>
+
+<select id="fetchAdminMemberList" resultType="MemberDto">
+      SELECT * FROM (
+          SELECT rownum rn, tmp.* FROM (
+              SELECT * FROM member
+              <where>
+                  <if test="keyword != null and keyword != ''">
+                      (member_id LIKE '%' || #{keyword} || '%' 
+                       OR member_nickname LIKE '%' || #{keyword} || '%')
+                  </if>
+                  AND member_level != '관리자'
+              </where>
+              ORDER BY member_id ASC
+          ) tmp
+      ) WHERE rn BETWEEN #{startRow} AND #{endRow}
+  </select>
+
+  <select id="countAdminMembers" resultType="int">
+      SELECT count(*) FROM member
+      <where>
+          <if test="keyword != null and keyword != ''">
+              (member_id LIKE '%' || #{keyword} || '%' 
+               OR member_nickname LIKE '%' || #{keyword} || '%')
+          </if>
+          AND member_level != '관리자'
+      </where>
+  </select>
 </mapper>

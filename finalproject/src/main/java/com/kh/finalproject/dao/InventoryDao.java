@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.kh.finalproject.dto.InventoryDto;
+import com.kh.finalproject.dto.MemberDto;
 
 @Repository
 public class InventoryDao {
@@ -67,6 +68,20 @@ public class InventoryDao {
         params.put("type", type);
         
         sqlSession.update("inventory.unequipByType", params);
+    }
+    
+ // [1] 관리자용 유저 목록 조회 (검색 + 페이징)
+    public List<MemberDto> fetchAdminMemberList(String keyword, int startRow, int endRow) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("keyword", keyword);
+        params.put("startRow", startRow);
+        params.put("endRow", endRow);
+        return sqlSession.selectList("inventory.fetchAdminMemberList", params);
+    }
+
+    // [2] 관리자용 유저 카운트 (페이징용)
+    public int countAdminMembers(String keyword) {
+        return sqlSession.selectOne("inventory.countAdminMembers", keyword);
     }
     
 }
