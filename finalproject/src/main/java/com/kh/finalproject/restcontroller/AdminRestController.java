@@ -30,7 +30,7 @@ import com.kh.finalproject.dao.InventoryDao;
 import com.kh.finalproject.dao.MemberDao;
 import com.kh.finalproject.dao.MemberIconDao;
 import com.kh.finalproject.dao.MemberTokenDao;
-
+import com.kh.finalproject.dao.PointHistoryDao;
 import com.kh.finalproject.dto.BoardDto;
 
 import com.kh.finalproject.dao.PointItemStoreDao;
@@ -39,6 +39,7 @@ import com.kh.finalproject.dto.IconDto;
 import com.kh.finalproject.dto.InventoryDto;
 import com.kh.finalproject.dto.MemberDto;
 import com.kh.finalproject.dto.MemberIconDto;
+import com.kh.finalproject.dto.PointHistoryDto;
 import com.kh.finalproject.dto.PointItemStoreDto;
 import com.kh.finalproject.dto.QuizDto;
 import com.kh.finalproject.error.NeedPermissionException;
@@ -102,7 +103,9 @@ public class AdminRestController {
 	
 	@Autowired
 	private PointService pointService;
-
+    
+	@Autowired
+	private PointHistoryDao pointHistoryDao;
 	
 
 	//기존 회원 목록 조회(관리자 제외, 일반 페이징)
@@ -259,8 +262,31 @@ public class AdminRestController {
 			return "fail";
 		}
 	}
-	// -------------------------------------------------------------
 
+	@GetMapping("/point/history/{memberId}")
+	public Map<String, Object> getMemberPointHistory(
+	        @PathVariable String memberId,
+	        @RequestParam(defaultValue = "1") int page,
+	        @RequestParam(defaultValue = "10") int size,
+	        @RequestParam(defaultValue = "ALL") String type) {
+
+	    int startRow = (page - 1) * size + 1;
+	    int endRow = page * size;
+
+	    // 1. 목록 조회
+	    List<PointHistoryDto> list = pointHistoryDao.selectListByMemberIdPaging(memberId, startRow, endRow, type);
+	    // 2. 전체 개수 조회
+	    int totalCount = pointHistoryDao.countHistory(memberId, type);
+	    // 3. 전체 페이지 계산
+	    int totalPage = (totalCount + size - 1) / size;
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("list", list);
+	    response.put("totalPage", totalPage);
+	    response.put("totalCount", totalCount);
+	    
+	    return response;
+	}
 	// -------------------------------------------------------------
 
 	// 퀴즈 신고 관리 페이지
