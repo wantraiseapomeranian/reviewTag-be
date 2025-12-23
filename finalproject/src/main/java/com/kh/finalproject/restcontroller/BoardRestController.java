@@ -32,6 +32,7 @@ import com.kh.finalproject.dto.BoardDto;
 import com.kh.finalproject.dto.BoardResponseDto;
 import com.kh.finalproject.dto.MemberDto;
 import com.kh.finalproject.error.TargetNotfoundException;
+import com.kh.finalproject.error.UnauthorizationException;
 import com.kh.finalproject.service.AttachmentService;
 import com.kh.finalproject.service.DailyQuestService;
 import com.kh.finalproject.service.PointService;
@@ -41,7 +42,9 @@ import com.kh.finalproject.vo.PageVO;
 import com.kh.finalproject.vo.TokenVO;
 
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @CrossOrigin
 @RestController
 @RequestMapping("/board")
@@ -117,7 +120,7 @@ public class BoardRestController {
 
 
 	//상세 조회
-	@GetMapping("/{boardNo}")
+	@GetMapping("/detail/{boardNo}")
 	public BoardDto selectOne(@PathVariable int boardNo) {
 		replyDao.updateBoardReplyCount(boardNo);
 		return boardDao.selectOne(boardNo);
@@ -185,12 +188,17 @@ public class BoardRestController {
 
 	// 게시글 삭제
 	@DeleteMapping("/{boardNo}")
-	public void delete(@RequestAttribute TokenVO tokenVO,@PathVariable int boardNo) {
+	public void delete(@RequestAttribute(value = "tokenVO", required = false) TokenVO tokenVO, @PathVariable int boardNo) {
+		if (tokenVO == null) {
+			throw new UnauthorizationException("로그인이 필요한 기능입니다."); 
+		}
+		
 		String loginId = tokenVO.getLoginId();
 		BoardDto boardDto = boardDao.selectOne(boardNo);
 		if(boardDto == null) throw new TargetNotfoundException("존재하지 않는 글");
-		
-		// 유저가 가지고있는 포인트 확인해서 변경
+			
+	
+		 //유저가 가지고있는 포인트 확인해서 변경
 		MemberDto memberDto = memberDao.selectOne(loginId);
 		int losePoint = -10; // 삭제로 잃는 포인트
 		int point = memberDto.getMemberPoint();  
